@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+# VS Code
+.vscode/*
+
+# project specific
+/external/*
+build/*
+
+# created by macOs
+*.DS_Store
