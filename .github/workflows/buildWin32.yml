@@ -4,18 +4,17 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
 
     strategy:
       matrix:
-        os: [windows-latest, macos-latest]
         build_type: [Release, Debug]
 
     steps:
     - uses: actions/checkout@v2
 
     - name: Create Build Environment
-      run: cmake -E make_directory ${{github.workspace}}/build
+      run: cmake -E make_directory ${{github.workspace}}/buildWin
 
     - name: Install vcpkg
       run: |
@@ -24,14 +23,14 @@ jobs:
         ${{github.workspace}}/external/vcpkg/bootstrap-vcpkg.sh
 
     - name: Configure CMake
-      shell: bash
-      run: cmake ${{github.workspace}} -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+      shell: pwsh
+      run: cmake "${{github.workspace}}" -B "${{github.workspace}}/buildWin" -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
     - name: Build
-      shell: bash
-      run: cmake --build ${{github.workspace}}/build --config ${{ matrix.build_type }}
+      shell: pwsh
+      run: cmake --build "${{github.workspace}}/buildWin" --config ${{ matrix.build_type }}
 
     - name: Test
-      shell: bash
-      working-directory: ${{github.workspace}}/build
+      shell: pwsh
+      working-directory: ${{github.workspace}}/buildWin
       run: ctest -C ${{ matrix.build_type }}
