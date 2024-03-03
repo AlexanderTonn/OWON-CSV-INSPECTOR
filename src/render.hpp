@@ -4,6 +4,7 @@
 #include "fileHandler.hpp"
 #include <cstdint>
 #include <string_view>
+#include <array>
 
 #ifdef _WIN32
 #include <Windows.h>
