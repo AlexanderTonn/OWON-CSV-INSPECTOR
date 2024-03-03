@@ -20,8 +20,8 @@ jobs:
     - name: Install vcpkg
       run: |
         mkdir ${{github.workspace}}/external
-        git clone https://github.com/Microsoft/vcpkg.git
-        ./vcpkg/bootstrap-vcpkg.sh
+        git clone https://github.com/Microsoft/vcpkg.git ${{github.workspace}}/external/vcpkg
+        ${{github.workspace}}/external/vcpkg/bootstrap-vcpkg.sh
 
     - name: Configure CMake
       shell: bash
