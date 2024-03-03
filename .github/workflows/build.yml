@@ -17,6 +17,12 @@ jobs:
     - name: Create Build Environment
       run: cmake -E make_directory ${{github.workspace}}/build
 
+    - name: Install vcpkg
+      run: |
+        mkdir ${{github.workspace}}/external
+        git clone https://github.com/Microsoft/vcpkg.git
+        ./vcpkg/bootstrap-vcpkg.sh
+
     - name: Configure CMake
       shell: bash
       run: cmake ${{github.workspace}} -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
