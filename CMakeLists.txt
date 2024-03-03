@@ -14,8 +14,12 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_OSX_ARCHITECTURES "arm64" ) # for apple silicon
-set(CMAKE_OSX_ARCHITECTURES "x86_64" ) # for intel
+
+if(APPLE)
+    set(CMAKE_OSX_ARCHITECTURES "arm64" ) # for apple silicon
+elseif(WIN32)
+    set(CMAKE_OSX_ARCHITECTURES "x86_64" ) # for intel
+endif()
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/)
 
