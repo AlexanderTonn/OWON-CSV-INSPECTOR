@@ -26,7 +26,7 @@ public:
 
     bool xCsvLoaded = false; // Flag to check if the CSV file was loaded
 
-    std::string sCurrentFile = "/Users/alexandertonn/Downloads/Wave2.csv"; // Current filename
+    std::string sCurrentFile = ""; // Current filename
     std::string sNewFile = ""; // New filename, which was selected by file dialog
 
     auto parseCSV(std::string sFilename, csvDataStruct *csvData) -> void;

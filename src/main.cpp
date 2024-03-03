@@ -86,7 +86,7 @@ int main(int, char **)
     // Create window with graphics context
     auto *window = glfwCreateWindow(static_cast<std::int32_t>(WINDOW_WIDTH),
                                     static_cast<std::int32_t>(WINDOW_HEIGHT),
-                                    "Gui",
+                                    "OWON CSV File Viewer",
                                     nullptr,
                                     nullptr);
     if (window == nullptr)

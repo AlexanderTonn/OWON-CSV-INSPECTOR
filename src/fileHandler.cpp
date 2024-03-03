@@ -54,7 +54,6 @@ auto fileHandler::getContentOfPath(std::filesystem::path &fPath ) -> std::string
 
         const auto isSelected = entry.path() == selectedPath;
         const auto isDir = entry.is_directory();
-        const auto isFile = entry.is_regular_file();
         auto entryName = entry.path().filename().string();
 
         if(isDir)
