@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.22)
 
 project(
     "OWON-CSV-INSPECTOR"
-    VERSION 0.1.0
+    VERSION 0.2.0
     LANGUAGES C CXX)
 
 message("PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")    #show the project source directory
@@ -39,11 +39,27 @@ set (VCPKG_DIR ${CMAKE_SOURCE_DIR}/external/vcpkg)
 # set (VCPKG_DIR ${CMAKE_SOURCE_DIR}/../../../../../vcpkg)
 include(${VCPKG_DIR}/scripts/buildsystems/vcpkg.cmake)
 
+find_path(LIBUSB_INCLUDE_DIR NAMES libusb.h)
+find_library(LIBUSB_LIBRARY NAMES libusb)
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(libusb DEFAULT_MSG LIBUSB_LIBRARY LIBUSB_INCLUDE_DIR)
+
+if(LIBUSB_FOUND AND NOT TARGET libusb::libusb)
+  add_library(libusb::libusb UNKNOWN IMPORTED)
+  set_target_properties(libusb::libusb PROPERTIES
+    IMPORTED_LOCATION "${LIBUSB_LIBRARY}"
+    INTERFACE_INCLUDE_DIRECTORIES "${LIBUSB_INCLUDE_DIR}")
+endif()
+
 find_package(fmt CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(implot CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(LIBUSB REQUIRED IMPORTED_TARGET libusb-1.0)
+
 
 add_executable(${PROJECT_NAME}
     src/main.cpp
@@ -64,8 +80,11 @@ target_set_warnings(TARGET ${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME} PUBLIC src/)
 
+
+
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt-header-only)
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
 target_link_libraries(${PROJECT_NAME} PRIVATE imgui::imgui)
 target_link_libraries(${PROJECT_NAME} PRIVATE implot::implot)
+target_link_libraries(${PROJECT_NAME} PRIVATE PkgConfig::LIBUSB)
