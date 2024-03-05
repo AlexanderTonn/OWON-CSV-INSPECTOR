@@ -24,6 +24,10 @@ void WindowClass::Draw(std::string_view label)
     {
         _fileHandler.path = _fileHandler.getDesktopPath();
         xFirstCycle = false;
+
+        // Debug: Test the usbHandler
+        std::cout << "USB MSC Result: " << _usbMSC.findOwonVolume() << std::endl;
+
     }
 
     // Draw the plot, if file is present

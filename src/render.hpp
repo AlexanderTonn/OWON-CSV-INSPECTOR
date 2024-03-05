@@ -2,6 +2,8 @@
 
 #include "csvHandler.hpp"
 #include "fileHandler.hpp"
+#include "usbHid.hpp"
+#include "usbMsc.hpp"
 #include <cstdint>
 #include <string_view>
 #include <array>
@@ -71,6 +73,8 @@ private:
     labels labels;
 
     csvHandler _csvHandler;
+    usbHID _usbHID;
+    usbMSC _usbMSC;
 
     // All about file and demo function
 private:

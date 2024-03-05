@@ -69,6 +69,10 @@ add_executable(${PROJECT_NAME}
     src/csvHandler.hpp
     src/fileHandler.hpp
     src/fileHandler.cpp
+    src/usbHid.hpp
+    src/usbHid.cpp
+    src/usbMsc.hpp
+    src/usbMsc.cpp
 )
 
 add_compile_definitions(NOMINMAX)
