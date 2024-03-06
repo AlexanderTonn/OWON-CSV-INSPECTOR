@@ -25,9 +25,6 @@ void WindowClass::Draw(std::string_view label)
         _fileHandler.path = _fileHandler.getDesktopPath();
         xFirstCycle = false;
 
-        // Debug: Test the usbHandler
-        std::cout << "USB MSC Result: " << _usbMSC.findOwonVolume() << std::endl;
-
     }
 
     // Draw the plot, if file is present
@@ -51,7 +48,10 @@ void WindowClass::Draw(std::string_view label)
 
         drawHeader();
         drawCursorData();
-        drawPlot(voltUnitId); // TODO! Crashes here
+        drawPlot(voltUnitId);
+
+        if ( _trig.at(0).fire(10'000) )
+          massStorageHandling();
 
         break;
     case currentPage::OPEN_FILE:
@@ -268,7 +268,7 @@ auto WindowClass::drawMenu() -> void
         {
             if (ImGui::MenuItem(labels.buttons[0].data()))
                 pageId = currentPage::OPEN_FILE;
-
+            ImGui::MenuItem(labels.checkBoxes[2].data(), nullptr, &xFindOwonVolumeActive);
             ImGui::EndMenu();
         }
         // "View"
@@ -401,4 +401,17 @@ auto WindowClass::openBugReport() -> void
                 system(sCmd.c_str());
         #endif
     }
+}
+/**
+ * @brief Do all the mass storage handling
+ *
+ */
+auto WindowClass::massStorageHandling() -> void
+{
+    if (_usbMSC.findOwonVolume(xFindOwonVolumeActive))
+        {
+            // find files
+            // create save directory in working directory
+            // copy files to save directory
+        }
 }

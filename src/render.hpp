@@ -4,6 +4,7 @@
 #include "fileHandler.hpp"
 #include "usbHid.hpp"
 #include "usbMsc.hpp"
+#include "funcTrigger.hpp"
 #include <cstdint>
 #include <string_view>
 #include <array>
@@ -55,8 +56,9 @@ private:
                                        "Help" ,
                                        "Bug Report" };
         std::string_view comboBoxes[1] = {"Unit"};
-        std::string_view checkBoxes[2] = {"Add Cursors: Voltage",
-                                          "Add Cursors: Time"};
+        std::string_view checkBoxes[3] = {"Add Cursors: Voltage",
+                                          "Add Cursors: Time",
+                                          "OWON Mass Storage"};
         // Items for the y-axis unit
         std::string_view cbUnitY[2] = {"mV",
                                        "V"};
@@ -74,7 +76,7 @@ private:
 
     csvHandler _csvHandler;
     usbHID _usbHID;
-    usbMSC _usbMSC;
+
 
     // All about file and demo function
 private:
@@ -99,6 +101,13 @@ private:
     auto drawCursors() -> void;
     auto drawCursorData() -> void;
     auto resetCursors() -> void;
+
+    // Handling the OWON mass storage
+private:
+    std::array<funcTrigger, 1> _trig ; // increase the Array size if you need more triggers
+    usbMSC _usbMSC;
+    auto massStorageHandling() -> void;
+    bool xFindOwonVolumeActive; // if true, the program will search for the owon volume
 
 public:
     void Draw(std::string_view label);

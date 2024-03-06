@@ -16,21 +16,40 @@
 #include <fstream>
 #include <array>
 #include <memory>
+#include <chrono>
+#include <sstream>
 
 class usbMSC
 {
 
 public:
-    auto findOwonVolume() -> bool;
+    auto findOwonVolume(bool xActive) -> bool;
+    auto moveFiles() -> bool;
 
 private:
-constexpr static std::string_view sOwonVolume = "NO NAME";
-constexpr static std::string_view sSaveDir = "massStorageData";
+    constexpr static std::string_view sOwonVolume = "NO NAME";
+    constexpr static std::string_view sSaveDir = "massStorageData";
+
+    // Save volume path
+private:
+    template <std::size_t size>
+    auto getVolumePath(std::array<char, size> aBuffer) -> void;
+    std::string sVolumePath;
 
 
 
 private:
-    auto createMainSaveDir() -> void;
+    auto checkMainSaveDir() -> void;
+    auto getBMPFiles() -> void;
+    auto getCSVFiles() -> void;
+
+// Create subfolder for saving the files
+private:
+    std::string sSubDir;
+    std::string sCurrentDate;
+    auto createSubDir() -> bool;
+    auto getDate() -> std::string;
+
 
 };
 

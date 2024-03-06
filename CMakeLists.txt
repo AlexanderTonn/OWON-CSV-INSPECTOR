@@ -73,6 +73,8 @@ add_executable(${PROJECT_NAME}
     src/usbHid.cpp
     src/usbMsc.hpp
     src/usbMsc.cpp
+    src/funcTrigger.hpp
+    src/funcTrigger.cpp
 )
 
 add_compile_definitions(NOMINMAX)
