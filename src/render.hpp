@@ -20,7 +20,7 @@ private:
         ImGuiWindowFlags_AlwaysAutoResize |
         ImGuiWindowFlags_NoDecoration |
         ImGuiWindowFlags_AlwaysVerticalScrollbar |
-        //ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoMove |
         ImGuiWindowFlags_MenuBar;
     constexpr static auto window_size = ImVec2(1280.0F, 720.0F);
     constexpr static auto window_pos = ImVec2(0.0F, 0.0F);
@@ -58,7 +58,7 @@ private:
         std::string_view comboBoxes[1] = {"Unit"};
         std::string_view checkBoxes[3] = {"Add Cursors: Voltage",
                                           "Add Cursors: Time",
-                                          "OWON Mass Storage"};
+                                          "Mass Storage detection"};
         // Items for the y-axis unit
         std::string_view cbUnitY[2] = {"mV",
                                        "V"};
@@ -108,6 +108,14 @@ private:
     usbMSC _usbMSC;
     auto massStorageHandling() -> void;
     bool xFindOwonVolumeActive; // if true, the program will search for the owon volume
+
+// Footer
+private:
+    std::array<std::string, 2> aFooterData;
+    uint8_t aFooterSize = 20;
+    auto drawFooter() -> void;
+    auto footerStartPos() -> float;
+
 
 public:
     void Draw(std::string_view label);

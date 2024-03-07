@@ -3,13 +3,14 @@
 /**
  * @brief Create the save directory for the mass storage data if it does not exist
  *
+ * @return true if the dir exists or was created, otherwise false
  */
-auto usbMSC::checkMainSaveDir() -> void
+auto usbMSC::checkMainSaveDir() -> bool
 {
     if (std::filesystem::exists(sSaveDir))
-        return;
+        return true;
     else
-        std::filesystem::create_directory(sSaveDir);
+        return std::filesystem::create_directory(sSaveDir);
 }
 
 /**
@@ -36,7 +37,8 @@ auto usbMSC::findOwonVolume(bool xActive) -> bool
 #elif __APPLE__
                                                           "diskutil list"
 #endif
-                                                          , "r"),
+                                                          ,
+                                                          "r"),
                                                       pclose);
 
         if (!pipe)
@@ -63,22 +65,26 @@ auto usbMSC::findOwonVolume(bool xActive) -> bool
  *
  * @return true if files are found
  */
-auto usbMSC::moveFiles() -> bool
+auto usbMSC::copy() -> bool
 {
-    checkMainSaveDir();
-
-    sCurrentDate = getDate();
-
     // Create subfolder for saving the files
-    if(createSubDir() && sCurrentDate != "")
+    if (setSavePath())
     {
-        getBMPFiles();
-        getCSVFiles();
+        // move the files
+        for (uint8_t i = 1; i <= MAX_FILE_COUNT; i++)
+        {
+            getFiles(getFile::CSV, i);
+            getFiles(getFile::BMP, i);
+        }
+
+        // unmount the volume
+        std::string sUnmountCmd = "diskutil unmount \"" + std::string(sOwonVolume) + "\"";
+        system(sUnmountCmd.c_str());
+
         return true;
     }
     else
         return false;
-
 }
 /**
  * @brief
@@ -108,44 +114,31 @@ auto usbMSC::getVolumePath(std::array<char, size> aBuffer) -> void
 #endif
 }
 /**
- * @brief
+ * @brief Before start copy the files, create the subfolder for saving the files
  *
+ * @return true if the subfolder exists or was created
  */
-auto usbMSC::getBMPFiles() -> void
+auto usbMSC::setSavePath() -> bool
 {
-    std::string sBmpPath = sVolumePath + ".BMP";
-    if (std::filesystem::exists(sBmpPath))
-    {
-        std::filesystem::copy(sBmpPath, sSaveDir, std::filesystem::copy_options::recursive);
-    }
-}
-auto usbMSC::getCSVFiles() -> void
-{
-    std::string sCsvPath = sVolumePath + ".CSV";
-    if (std::filesystem::exists(sCsvPath))
-    {
-        std::filesystem::copy(sCsvPath, sSaveDir, std::filesystem::copy_options::recursive);
-    }
-}
+    sCurrentDate = getDate();
+    sSavePath = std::string(sSaveDir) + "/" + sCurrentDate;
 
-/**
- * @brief
- *
- * @return
- */
-auto usbMSC::createSubDir() -> bool
-{
-    std::string sSavePath = std::string(sSaveDir) + "/" + sSubDir;
+    auto mainDirPresent = checkMainSaveDir();
 
-    if (std::filesystem::exists(sSavePath))
+    if (mainDirPresent && std::filesystem::exists(sSavePath) )
         return true;
     else
-        return std::filesystem::create_directory(sSubDir);
+    {
+        if (sCurrentDate != "" && mainDirPresent)
+            return std::filesystem::create_directory(sSavePath);
+        else
+            return false;
+    }
 }
 /**
- * @brief
+ * @brief get the Date of today
  *
- * @return
+ * @return day as string
  */
 auto usbMSC::getDate() -> std::string
 {
@@ -155,4 +148,44 @@ auto usbMSC::getDate() -> std::string
     std::stringstream ss;
     ss << std::put_time(std::localtime(&in_time_t), "%Y-%m-%d");
     return ss.str();
+}
+/**
+ * @brief Move the files from volume to the save directory
+ *
+ * @param type enum class fileTypes
+ * @param uiFileNo used for the file number
+ */
+auto usbMSC::getFiles(getFile type, uint8_t uiFileNo) -> bool
+{
+    std::string sVolFilePath; // Path on OWON Volume
+    switch (type)
+    {
+    case getFile::BMP:
+        sVolFilePath = sVolumePath + "/" + "IMAGE" + std::to_string(uiFileNo) + ".BMP";
+
+        break;
+    case getFile::CSV:
+        sVolFilePath = sVolumePath + "/" + "WAVE" + std::to_string(uiFileNo) + ".CSV";
+
+        break;
+
+    std::cout << sVolFilePath << std::endl;
+    case getFile::MOVE:
+
+        if (std::filesystem::exists(sVolFilePath))
+        {
+            std::cout << sVolFilePath << std::endl;
+            std::filesystem::copy(sVolFilePath, sSaveDir, std::filesystem::copy_options::overwrite_existing);
+            return true;
+        }
+        else
+            return false;
+
+
+        break;
+
+    default:
+        //return;
+        break;
+    }
 }

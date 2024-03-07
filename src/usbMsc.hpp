@@ -24,31 +24,36 @@ class usbMSC
 
 public:
     auto findOwonVolume(bool xActive) -> bool;
-    auto moveFiles() -> bool;
+    auto copy() -> bool;
 
 private:
     constexpr static std::string_view sOwonVolume = "NO NAME";
     constexpr static std::string_view sSaveDir = "massStorageData";
 
-    // Save volume path
+    // create volume path
 private:
     template <std::size_t size>
     auto getVolumePath(std::array<char, size> aBuffer) -> void;
     std::string sVolumePath;
 
-
-
 private:
-    auto checkMainSaveDir() -> void;
-    auto getBMPFiles() -> void;
-    auto getCSVFiles() -> void;
+    auto checkMainSaveDir() -> bool;
+    enum class getFile
+    {
+        BMP,
+        CSV,
+        MOVE
+    };
+    auto getFiles(getFile type, uint8_t uiFileNo) -> bool;
+    constexpr static uint8_t MAX_FILE_COUNT = 4;
 
 // Create subfolder for saving the files
 private:
-    std::string sSubDir;
     std::string sCurrentDate;
-    auto createSubDir() -> bool;
+    auto setSavePath() -> bool;
     auto getDate() -> std::string;
+public:
+    std::string sSavePath;
 
 
 };

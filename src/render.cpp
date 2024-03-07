@@ -53,6 +53,7 @@ void WindowClass::Draw(std::string_view label)
         if ( _trig.at(0).fire(10'000) )
           massStorageHandling();
 
+        drawFooter();
         break;
     case currentPage::OPEN_FILE:
         drawFilebrowser(_fileHandler.path);
@@ -71,7 +72,7 @@ void WindowClass::Draw(std::string_view label)
  */
 auto render(WindowClass &window_obj) -> void
 {
-    window_obj.Draw("OWON HDS-N Series CSV Wave Inspector");
+    window_obj.Draw("OWON HDS Series CSV Wave Viewer");
 }
 /**
  * @brief  Draw the csv file as ImPlot
@@ -87,7 +88,7 @@ auto WindowClass::drawPlot(voltUnit unit) -> void
     static auto PlotY = std::array<double, numOfPoints>{};
 
     ImVec2 dynPlotSize;
-    dynPlotSize.y = ImGui::GetWindowHeight() - ImGui::GetCursorPos().y;
+    dynPlotSize.y = footerStartPos() - ImGui::GetCursorPos().y;
     dynPlotSize.x = ImGui::GetWindowWidth() - ImGui::GetCursorPos().x;
 
     if (ImPlot::BeginPlot("###Plot", dynPlotSize, (ImPlotFlags_NoTitle | ImPlotFlags_Crosshairs)))
@@ -352,12 +353,6 @@ auto WindowClass::drawCursorData() -> void
         ImGui::Text("Voltage: ");
         ImGui::TableNextColumn();
 
-        /*
-                if (voltUnitId == voltUnit::V)
-                    sCursorUnit = labels.cbUnitY[1];
-                else
-                    sCursorUnit = labels.cbUnitY[0];
-        */
         sCursorUnit = (voltUnitId == voltUnit::V) ? labels.cbUnitY[1] : labels.cbUnitY[0];
 
         ImGui::Text("A: %.2f %s", aPlottCursors[2], sCursorUnit.data());
@@ -408,10 +403,36 @@ auto WindowClass::openBugReport() -> void
  */
 auto WindowClass::massStorageHandling() -> void
 {
+    // owon msc was found
     if (_usbMSC.findOwonVolume(xFindOwonVolumeActive))
         {
-            // find files
-            // create save directory in working directory
-            // copy files to save directory
+            aFooterData.at(1) = "Owon Volume found, copy files...";
+
+            if(_usbMSC.copy())
+                aFooterData.at(1) = "Files copied to: " + _usbMSC.sSavePath;
+            else
+                aFooterData.at(1) = "No files found";
         }
+}
+
+auto WindowClass::drawFooter() -> void
+{
+    aFooterData.at(0) = _csvHandler.sCurrentFile;
+    if (aFooterData.at(0).empty())
+        aFooterData.at(0) = "No file loaded";
+
+    ImGui::SetCursorPosY(footerStartPos());
+
+    ImGui::BeginTable("###Footer", 2, ImGuiTableFlags_SizingFixedSame );
+    ImGui::TableNextRow();
+    ImGui::TableNextColumn();
+    ImGui::Text("File: %s", aFooterData.at(0).c_str());
+    ImGui::TableNextColumn();
+    ImGui::Text("%s", aFooterData.at(1).c_str());
+    ImGui::EndTable();
+}
+
+auto WindowClass::footerStartPos() -> float
+{
+    return ImGui::GetWindowHeight() - aFooterSize;
 }

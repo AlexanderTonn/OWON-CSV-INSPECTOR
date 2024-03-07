@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
 project(
-    "OWON-CSV-INSPECTOR"
+    "OWON-HDS2-Viewer"
     VERSION 0.2.0
     LANGUAGES C CXX)
 
