@@ -37,6 +37,7 @@ void WindowClass::Draw(std::string_view label)
     // ##########
     // Frontend stuff
     // ##########
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::Begin(label.data(), nullptr, window_flags);
     ImGui::SetCursorPos(ImVec2(0.0F, 0.0F));
 

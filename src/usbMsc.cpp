@@ -162,11 +162,11 @@ auto usbMSC::getFiles(getFile type, uint8_t uiFileNo) -> bool
     {
     case getFile::BMP:
         sVolFilePath = sVolumePath + "/" + "IMAGE" + std::to_string(uiFileNo) + ".BMP";
-
+        type = getFile::MOVE;
         break;
     case getFile::CSV:
         sVolFilePath = sVolumePath + "/" + "WAVE" + std::to_string(uiFileNo) + ".CSV";
-
+        type = getFile::MOVE;
         break;
 
     std::cout << sVolFilePath << std::endl;
