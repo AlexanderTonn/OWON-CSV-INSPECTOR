@@ -5,23 +5,23 @@
  *
  * @return true if the dir exists or was created, otherwise false
  */
-auto usbMSC::checkMainSaveDir() -> bool
+auto usbMSC::createSaveDir(std::string sInputPath) -> bool
 {
-    if (std::filesystem::exists(sSaveDir))
+    if (std::filesystem::exists(sInputPath))
         return true;
     else
-        return std::filesystem::create_directory(sSaveDir);
+        return std::filesystem::create_directory(sInputPath);
 }
 
 /**
  * @brief Find the owon volume in the file system
- * @note call this cyclically to check if the owon device is connected
+ * @note the function is blocking the execution if volume was already found
  * @param xActive Activate the function
- * @return
+ * @return true if the volume was found
  */
 auto usbMSC::findOwonVolume(bool xActive) -> bool
 {
-    if (xActive)
+    if (xActive && !xVolumeFound)
     {
         // Buffer for the command output
         // if buffer is too small the fget() have to be called multiple times
@@ -54,6 +54,7 @@ auto usbMSC::findOwonVolume(bool xActive) -> bool
         if (sParseResult.find(sOwonVolume) != std::string::npos)
         {
             getVolumePath(aBuffer);
+            xVolumeFound = true;
             return true;
         }
     }
@@ -65,14 +66,16 @@ auto usbMSC::findOwonVolume(bool xActive) -> bool
  *
  * @return true if files are found
  */
-auto usbMSC::copy() -> bool
+auto usbMSC::copy(std::string sTargetSavePath) -> bool
 {
     // Create subfolder for saving the files
-    if (setSavePath())
+    // TODO: Create dir is working properly
+    if (xVolumeFound && setSavePath(sTargetSavePath) )
     {
         // move the files
         for (uint8_t i = 1; i <= MAX_FILE_COUNT; i++)
         {
+            // TODO: Moving did not work
             getFiles(getFile::CSV, i);
             getFiles(getFile::BMP, i);
         }
@@ -80,7 +83,7 @@ auto usbMSC::copy() -> bool
         // unmount the volume
         std::string sUnmountCmd = "diskutil unmount \"" + std::string(sOwonVolume) + "\"";
         system(sUnmountCmd.c_str());
-
+        xVolumeFound = false;
         return true;
     }
     else
@@ -100,7 +103,6 @@ auto usbMSC::getVolumePath(std::array<char, size> aBuffer) -> void
     if (volPos != std::string::npos)
         sVolumePath = aBuffer.substr(volPos - 1, 2) + "\\";
 
-// TODO! Test this on a linux machine
 #elif __linux__
     std::size_t volPos = aBuffer.find(sOwonVolume);
     if (volPos != std::string::npos)
@@ -115,22 +117,22 @@ auto usbMSC::getVolumePath(std::array<char, size> aBuffer) -> void
 }
 /**
  * @brief Before start copy the files, create the subfolder for saving the files
- *
+ * @param sInputpath Inputpath is the target path passed by the user
  * @return true if the subfolder exists or was created
  */
-auto usbMSC::setSavePath() -> bool
+auto usbMSC::setSavePath(std::string sInputpath) -> bool
 {
     sCurrentDate = getDate();
-    sSavePath = std::string(sSaveDir) + "/" + sCurrentDate;
+    sSavePath = sInputpath + std::string(sSaveDir) + "/" + sCurrentDate + "/";
 
-    auto mainDirPresent = checkMainSaveDir();
+    //auto mainDirPresent = createSaveDir(sInputpath);
 
-    if (mainDirPresent && std::filesystem::exists(sSavePath) )
+    if (std::filesystem::exists(sSavePath) )
         return true;
     else
     {
-        if (sCurrentDate != "" && mainDirPresent)
-            return std::filesystem::create_directory(sSavePath);
+        if (sCurrentDate != "")
+            return std::filesystem::create_directories(sSavePath);
         else
             return false;
     }
@@ -162,30 +164,23 @@ auto usbMSC::getFiles(getFile type, uint8_t uiFileNo) -> bool
     {
     case getFile::BMP:
         sVolFilePath = sVolumePath + "/" + "IMAGE" + std::to_string(uiFileNo) + ".BMP";
-        type = getFile::MOVE;
         break;
     case getFile::CSV:
         sVolFilePath = sVolumePath + "/" + "WAVE" + std::to_string(uiFileNo) + ".CSV";
-        type = getFile::MOVE;
         break;
-
-    std::cout << sVolFilePath << std::endl;
-    case getFile::MOVE:
-
-        if (std::filesystem::exists(sVolFilePath))
+    default:
+        return false;
+    break;
+    }
+    std::cout << "Image Path on Deive: " <<  sVolFilePath << std::endl;
+    std::cout << "TargetPath: " <<  sSaveDir << std::endl;
+        // Move
+        if (std::filesystem::exists(sVolFilePath) && std::filesystem::exists(sSavePath) )
         {
-            std::cout << sVolFilePath << std::endl;
-            std::filesystem::copy(sVolFilePath, sSaveDir, std::filesystem::copy_options::overwrite_existing);
+            std::filesystem::copy(sVolFilePath, sSavePath, std::filesystem::copy_options::overwrite_existing);
             return true;
         }
         else
             return false;
 
-
-        break;
-
-    default:
-        //return;
-        break;
-    }
 }

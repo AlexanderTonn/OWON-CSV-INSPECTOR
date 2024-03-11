@@ -19,20 +19,8 @@ void WindowClass::Draw(std::string_view label)
     // Backend stuff
     // ##########
 
-    // Get path of the desktop
-    if (xFirstCycle)
-    {
-        _fileHandler.path = _fileHandler.getDesktopPath();
-        xFirstCycle = false;
-
-    }
-
-    // Draw the plot, if file is present
-    if (!_csvHandler.xCsvLoaded && !_csvHandler.sCurrentFile.empty())
-    {
-        _csvHandler.parseCSV(_csvHandler.sCurrentFile, _csvHandler.csvData);
-        _csvHandler.xCsvLoaded = true;
-    }
+    // TODO: Solution for now, optimize later
+    handleFileData();
 
     // ##########
     // Frontend stuff
@@ -50,15 +38,33 @@ void WindowClass::Draw(std::string_view label)
         drawHeader();
         drawCursorData();
         drawPlot(voltUnitId);
-
-        if ( _trig.at(0).fire(10'000) )
-          massStorageHandling();
+        trigMscDetection();
 
         drawFooter();
         break;
-    case currentPage::OPEN_FILE:
-        drawFilebrowser(_fileHandler.path);
+
+    case currentPage::OPEN_CSV_FILE:
+        drawFilebrowser(_fileCSV.path,
+                        _fileCSV.sCurrentFile,
+                        _fileCSV.sNewFile,
+                        _fileCSV.xFileLoaded,
+                        _fileCSV,
+                        fileHandler::contentPathOption::WAVE_FILE);
         break;
+
+    case currentPage::CHOOSE_MSC_PATH:
+        drawFilebrowser(_fileMsc.path,
+                        _fileMsc.sCurrentFile,
+                        _fileMsc.sNewFile,
+                        _fileMsc.xFileLoaded,
+                        _fileMsc,
+                        fileHandler::contentPathOption::DIRECTORY);
+        break;
+
+    case currentPage::CHOICE_WINDOW:
+        choiceWindow(labels.dialogNames[1].data(), labels.description[0].data());
+        break;
+
     default:
         break;
     }
@@ -92,13 +98,15 @@ auto WindowClass::drawPlot(voltUnit unit) -> void
     dynPlotSize.y = footerStartPos() - ImGui::GetCursorPos().y;
     dynPlotSize.x = ImGui::GetWindowWidth() - ImGui::GetCursorPos().x;
 
+    if (xResetView)
+    {
+        ImPlot::SetNextAxesToFit();
+        xResetView = false;
+    }
+
     if (ImPlot::BeginPlot("###Plot", dynPlotSize, (ImPlotFlags_NoTitle | ImPlotFlags_Crosshairs)))
     {
-        if (xResetView)
-        {
-            ImPlot::SetNextAxesToFit();
-            xResetView = false;
-        }
+
         ImPlot::SetupAxes(labels.plotX.data(), labels.plotY.data(), ImPlotAxisFlags_None, ImPlotAxisFlags_AutoFit);
         ImPlot::SetupAxisLimitsConstraints(ImAxis_X1, 0, numOfPoints);
 
@@ -179,45 +187,51 @@ auto WindowClass::drawHeader() -> void
     ImGui::Columns(1);
 }
 /**
- * @brief Draw the filebrowser
+ * @brief draw the filebrowser
  *
- * @param fPath contains the path of selected item
+ * @param fPath contains the complete path of selected item
+ * @param sCurrent string path of the current file
+ * @param sNew string path of the new file
+ * @param xNotLoaded - true, if the file is not loaded
+ * @note use the xNoatLoaded for proceeding the file once
  */
-auto WindowClass::drawFilebrowser(std::filesystem::path &fPath) -> void
+auto WindowClass::drawFilebrowser(std::filesystem::path &fPath,
+                                  std::string &sCurrent,
+                                  std::string &sNew,
+                                  bool &xNotLoaded,
+                                  fileHandler &_fileHandler,
+                                  fileHandler::contentPathOption option) -> void
 {
-    ImGui::OpenPopup(labels.fileDialog.data());
+    ImGui::OpenPopup(labels.dialogNames[0].data());
 
-    if (ImGui::BeginPopupModal(labels.fileDialog.data(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    if (ImGui::BeginPopupModal(labels.dialogNames[0].data(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        std::string_view labelBtnBack = "<";
-        std::string_view labelBtnOk = "OK";
-        std::string_view labelBtnCancel = "Cancel";
-
         static std::string sFileName;
         // go back in file path
-        if (ImGui::Button(labelBtnBack.data()))
+        if (ImGui::Button(labels.buttons[5].data()))
         {
             // Check whether parent is available
             if (fPath.has_parent_path() && fPath.parent_path() != fPath.root_path())
-            {
-                fPath = fPath.parent_path(); // TODO! Why is here no parent?
-            }
+                fPath = fPath.parent_path();
         }
-        ImGui::Text("Currentpath: %s", fPath.string().c_str());
+        ImGui::Text("Current path: %s", fPath.string().c_str());
         ImGui::Separator();
 
-        _csvHandler.sNewFile = _fileHandler.getContentOfPath(fPath);
+        sNew = _fileHandler.getContentOfPath(fPath, option);
 
         ImGui::Separator();
-        if (ImGui::Button(labelBtnOk.data()))
+        // OK Btn pressed
+        if (ImGui::Button(labels.buttons[6].data()))
         {
-            _csvHandler.sCurrentFile = _csvHandler.sNewFile;
-            _csvHandler.xCsvLoaded = false; // Allow to load new file
+            sCurrent = sNew;
+            xNotLoaded = false; // Allow to load new file
             pageId = currentPage::MAIN;
             ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
-        if (ImGui::Button(labelBtnCancel.data()))
+
+        // Cancel Btn pressed
+        if (ImGui::Button(labels.buttons[7].data()))
         {
             pageId = currentPage::MAIN;
             ImGui::CloseCurrentPopup();
@@ -268,8 +282,9 @@ auto WindowClass::drawMenu() -> void
         // "Menu"
         if (ImGui::BeginMenu(labels.menu[0].data()))
         {
+            ImGui::MenuItem(labels.description[1].data(), nullptr, false, false);
             if (ImGui::MenuItem(labels.buttons[0].data()))
-                pageId = currentPage::OPEN_FILE;
+                pageId = currentPage::OPEN_CSV_FILE;
             ImGui::MenuItem(labels.checkBoxes[2].data(), nullptr, &xFindOwonVolumeActive);
             ImGui::EndMenu();
         }
@@ -387,53 +402,119 @@ auto WindowClass::openBugReport() -> void
         xBugReportOpen = false;
         static std::string_view sBugReportUrl = "https://github.com/AlexanderTonn/OWON-CSV-INSPECTOR/issues";
 
-        #ifdef _WIN32
-                ShellExecute(NULL, "open ", sBugReportUrl.data(), NULL, NULL, SW_SHOWNORMAL);
-        #elif __APPLE__
-                std::string sCmd = std::string("open ") + sBugReportUrl.data();
-                system(sCmd.c_str());
-        #elif __linux__
-                std::string sCmd = std::string("xdg-open ") + sBugReportUrl.data();
-                system(sCmd.c_str());
-        #endif
+#ifdef _WIN32
+        ShellExecute(NULL, "open ", sBugReportUrl.data(), NULL, NULL, SW_SHOWNORMAL);
+#elif __APPLE__
+        std::string sCmd = std::string("open ") + sBugReportUrl.data();
+        system(sCmd.c_str());
+#elif __linux__
+        std::string sCmd = std::string("xdg-open ") + sBugReportUrl.data();
+        system(sCmd.c_str());
+#endif
     }
 }
 /**
- * @brief Do all the mass storage handling
+ * @brief Trigger the Mass storage volume detection
  *
  */
-auto WindowClass::massStorageHandling() -> void
+auto WindowClass::trigMscDetection() -> void
 {
     // owon msc was found
-    if (_usbMSC.findOwonVolume(xFindOwonVolumeActive))
-        {
-            aFooterData.at(1) = "Owon Volume found, copy files...";
+    if (_trig.at(0).fire(10'000))
+        if (!_usbMSC.xVolumeFound && _usbMSC.findOwonVolume(xFindOwonVolumeActive))
+            aFooterData.at(1) = "Owon Volume found. Want open? ";
 
-            if(_usbMSC.copy())
-                aFooterData.at(1) = "Files copied to: " + _usbMSC.sSavePath;
-            else
-                aFooterData.at(1) = "No files found";
-        }
 }
-
+/**
+ * @brief Draw the footer data
+ *
+ */
 auto WindowClass::drawFooter() -> void
 {
-    aFooterData.at(0) = _csvHandler.sCurrentFile;
+    aFooterData.at(0) = _fileCSV.sCurrentFile;
     if (aFooterData.at(0).empty())
-        aFooterData.at(0) = "No file loaded";
+        aFooterData.at(0) = labels.footer[0].data();
 
     ImGui::SetCursorPosY(footerStartPos());
 
-    ImGui::BeginTable("###Footer", 2, ImGuiTableFlags_SizingFixedSame );
+    ImGui::BeginTable("###Footer", 2, ImGuiTableFlags_SizingFixedSame);
     ImGui::TableNextRow();
+    // COL 1
     ImGui::TableNextColumn();
-    ImGui::Text("File: %s", aFooterData.at(0).c_str());
+    ImGui::Text("%s %s", labels.footer[1].data(), aFooterData.at(0).c_str());
+
+    // COL 2
     ImGui::TableNextColumn();
     ImGui::Text("%s", aFooterData.at(1).c_str());
+    // cheack each 10s if owon msc is connected
+    ImGui::SameLine();
+    if (_usbMSC.xVolumeFound && ImGui::Button(labels.buttons[8].data()))
+        pageId = currentPage::CHOOSE_MSC_PATH;
+
+
     ImGui::EndTable();
 }
-
+/**
+ * @brief Set the start position of the footer
+ *
+ * @return start position of the footer
+ */
 auto WindowClass::footerStartPos() -> float
 {
     return ImGui::GetWindowHeight() - aFooterSize;
+}
+
+auto WindowClass::handleFileData() -> void
+{
+    // Get path of the desktop
+    if (xFirstCycle)
+    {
+        _fileCSV.initFilePath(fileHandler::standardPath::DOCUMENTS);
+        _fileMsc.initFilePath(fileHandler::standardPath::DOCUMENTS);
+        xFirstCycle = false;
+    }
+
+    // Draw the plot, if file is present
+    if (_fileCSV.check())
+        _csvHandler.parseCSV(_fileCSV.sCurrentFile, _csvHandler.csvData);
+
+    if(_fileMsc.check())
+        if(_usbMSC.copy(_fileMsc.sCurrentFile))
+        {
+            aFooterData.at(1) = "Files copied to " + _fileMsc.sCurrentFile;
+            _usbMSC.xVolumeFound = false;
+        }
+
+
+}
+/**
+ * @brief pening a dialog which allow to decide window
+ *
+ */
+auto WindowClass::choiceWindow(std::string_view sName, std::string_view sQuestion) -> bool
+{
+    auto xReturn = false;
+    ImGui::OpenPopup(sName.data());
+
+    if (ImGui::BeginPopupModal(sName.data(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("%s", sQuestion.data());
+        ImGui::Spacing();
+
+        // OK Button
+        if (ImGui::Button(labels.buttons[6].data()))
+        {
+            ImGui::CloseCurrentPopup();
+            xReturn = true;
+        }
+        // Cancel Button
+        else if (ImGui::Button(labels.buttons[7].data()))
+        {
+            ImGui::CloseCurrentPopup();
+            xReturn = false;
+        }
+    }
+    ImGui::EndPopup();
+
+    return xReturn;
 }

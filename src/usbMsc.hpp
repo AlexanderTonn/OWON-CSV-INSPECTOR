@@ -24,7 +24,8 @@ class usbMSC
 
 public:
     auto findOwonVolume(bool xActive) -> bool;
-    auto copy() -> bool;
+    auto copy(std::string sTargetSavePath) -> bool;
+    bool xVolumeFound = false; // if true, the owon volume is found
 
 private:
     constexpr static std::string_view sOwonVolume = "NO NAME";
@@ -36,8 +37,9 @@ private:
     auto getVolumePath(std::array<char, size> aBuffer) -> void;
     std::string sVolumePath;
 
+
 private:
-    auto checkMainSaveDir() -> bool;
+    auto createSaveDir(std::string sInputPath) -> bool;
     enum class getFile
     {
         BMP,
@@ -50,11 +52,9 @@ private:
 // Create subfolder for saving the files
 private:
     std::string sCurrentDate;
-    auto setSavePath() -> bool;
-    auto getDate() -> std::string;
-public:
     std::string sSavePath;
-
+    auto setSavePath(std::string sInputpath) -> bool;
+    auto getDate() -> std::string;
 
 };
 

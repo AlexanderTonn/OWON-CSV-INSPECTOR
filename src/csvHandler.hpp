@@ -24,11 +24,6 @@ public:
         double y; };
     csvDataStruct csvData[DATA_ROWS];
 
-    bool xCsvLoaded = false; // Flag to check if the CSV file was loaded
-
-    std::string sCurrentFile = ""; // Current filename
-    std::string sNewFile = ""; // New filename, which was selected by file dialog
-
     auto parseCSV(std::string sFilename, csvDataStruct *csvData) -> void;
     auto extractData(csvDataStruct *csvData, const double lineNo) -> double;
     auto extractHeaderData(csvDataStruct *csvData, const double lineNo) -> std::string;
