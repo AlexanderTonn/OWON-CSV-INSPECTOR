@@ -18,6 +18,7 @@
 #include <memory>
 #include <chrono>
 #include <sstream>
+#include <filesystem>
 
 class usbMSC
 {

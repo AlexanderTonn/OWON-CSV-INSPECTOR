@@ -20,6 +20,7 @@ void WindowClass::Draw(std::string_view label)
     // ##########
 
     // TODO: Solution for now, optimize later
+    //TODO!SIGSEGV on Linux
     handleFileData();
 
     // ##########

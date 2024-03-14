@@ -17,7 +17,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(APPLE)
     set(CMAKE_OSX_ARCHITECTURES "arm64" ) # for apple silicon
-elseif(WIN32)
+elseif(WIN32 OR UNIX)
     set(CMAKE_OSX_ARCHITECTURES "x86_64" ) # for intel
 endif()
 

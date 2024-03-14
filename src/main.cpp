@@ -76,6 +76,12 @@ int main(int, char **)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // 3.2+ only
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);           // Required on Mac
+#elif defined(__linux__)
+    // Reduce the requirements for the OpenGL version on linux
+    // GL 2.1 + GLSL 120
+    const char *glsl_version = "#version 120";
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 #else
     // GL 3.0 + GLSL 130
     const char *glsl_version = "#version 130";
@@ -94,7 +100,7 @@ int main(int, char **)
         return 1;
     }
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(6); // Enable vsync
+    glfwSwapInterval(3); // Enable vsync
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();

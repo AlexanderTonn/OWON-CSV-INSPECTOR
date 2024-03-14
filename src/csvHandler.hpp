@@ -18,10 +18,11 @@ public:
     constexpr static uint16_t DATA_ROWS = 8'100;
 
     struct csvDataStruct {
-        std::string headerName;
-        std::string headerData;
-        double x;
-        double y; };
+        std::string headerName = "";
+        std::string headerData = "";
+        double x = 0.0;
+        double y = 0.0;
+        };
     csvDataStruct csvData[DATA_ROWS];
 
     auto parseCSV(std::string sFilename, csvDataStruct *csvData) -> void;

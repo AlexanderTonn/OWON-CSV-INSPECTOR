@@ -61,7 +61,7 @@ auto fileHandler::getContentOfPath(std::filesystem::path &fPath, contentPathOpti
 
         switch (option)
         {
-            case contentPathOption::WAVE_FILE:
+        case contentPathOption::WAVE_FILE:
             if (std::filesystem::is_regular_file(selectedPath))
             {
                 // only allow the WAVE.CSV files
@@ -74,16 +74,16 @@ auto fileHandler::getContentOfPath(std::filesystem::path &fPath, contentPathOpti
                     ImGui::Text("Selected file is not WAVE CSV file!");
             }
             break;
-            case contentPathOption::DIRECTORY:
-                // help finding a directory
-                if(std::filesystem::is_directory(selectedPath))
-                {
-                    ImGui::Text("This is a directory");
+        case contentPathOption::DIRECTORY:
+            // help finding a directory
+            if (std::filesystem::is_directory(selectedPath))
+            {
+                ImGui::Text("This is a directory");
 
-                    return selectedPath.string() + '/';
-                }
-                else
-                    ImGui::Text("This is not a direktory");
+                return selectedPath.string() + '/';
+            }
+            else
+                ImGui::Text("This is not a direktory");
             break;
         }
     }
@@ -129,64 +129,78 @@ auto fileHandler::getFileAtPos(std::filesystem::path fPath, uint16_t uiPos) -> s
  */
 auto fileHandler::initFilePath(standardPath option) -> void
 {
+    char * ptr_xdgPath = nullptr;
     switch (option)
     {
     case standardPath::DESKTOP:
 #ifdef _WIN32
         path = std::filesystem::path(std::getenv("USERPROFILE")) / "Desktop";
-#elif __APPLE__
-        path = std::filesystem::path(std::getenv("HOME")) / "Desktop";
-#elif __linux__
-        path = std::filesystem::path(std::getenv("XDG_DESKTOP_DIR"));
+
+#elif __APPLE__ || __linux__
+        if (std::getenv("XDG_DESKTOP_DIR"))
+            path = std::filesystem::path(std::getenv("XDG_DESKTOP_DIR"));
+        else
+            path = std::filesystem::path(std::getenv("HOME")) / "Desktop";
 #endif
+
         break;
+
     case standardPath::DOCUMENTS:
 #ifdef _WIN32
         path = std::filesystem::path(std::getenv("USERPROFILE")) / "Documents";
-#elif __APPLE__
-        path = std::filesystem::path(std::getenv("HOME")) / "Documents";
-#elif __linux__
-        path = std::filesystem::path(std::getenv("XDG_DOCUMENTS_DIR"));
+#elif __APPLE__ || __linux__
+        ptr_xdgPath = std::getenv("XDG_DOCUMENTS_DIR");
+        if (ptr_xdgPath)
+            path = std::filesystem::path(std::getenv("XDG_DOCUMENTS_DIR"));
+        else
+            path = std::filesystem::path(std::getenv("HOME")) / "Documents";
 #endif
         break;
+
     case standardPath::DOWNLOADS:
 #ifdef _WIN32
         path = std::filesystem::path(std::getenv("USERPROFILE")) / "Downloads";
-#elif __APPLE__
-        path = std::filesystem::path(std::getenv("HOME")) / "Downloads";
-#elif __linux__
-        path = std::filesystem::path(std::getenv("XDG_DOWNLOAD_DIR"));
+#elif __APPLE__ || __linux__
+        if (std::getenv("XDG_DOWNLOAD_DIR"))
+            path = std::filesystem::path(std::getenv("XDG_DOWNLOAD_DIR"));
+        else
+            path = std::filesystem::path(std::getenv("HOME")) / "Downloads";
 #endif
         break;
+
     case standardPath::PICTURES:
 #ifdef _WIN32
         path = std::filesystem::path(std::getenv("USERPROFILE")) / "Pictures";
-#elif __APPLE__
-        path = std::filesystem::path(std::getenv("HOME")) / "Pictures";
-#elif __linux__
-        path = std::filesystem::path(std::getenv("XDG_PICTURES_DIR"));
+#elif __APPLE__ || __linux__
+        if (std::getenv("XDG_PICTURES_DIR"))
+            path = std::filesystem::path(std::getenv("XDG_PICTURES_DIR"));
+        else
+            path = std::filesystem::path(std::getenv("HOME")) / "Pictures";
 #endif
         break;
     case standardPath::MUSIC:
 #ifdef _WIN32
         path = std::filesystem::path(std::getenv("USERPROFILE")) / "Music";
-#elif __APPLE__
-        path = std::filesystem::path(std::getenv("HOME")) / "Music";
-#elif __linux__
-        path = std::filesystem::path(std::getenv("XDG_MUSIC_DIR"));
+#elif __APPLE__ || __linux__
+        if (std::getenv("XDG_MUSIC_DIR"))
+            path = std::filesystem::path(std::getenv("XDG_MUSIC_DIR"));
+        else
+            path = std::filesystem::path(std::getenv("HOME")) / "Music";
 #endif
         break;
     case standardPath::VIDEOS:
 #ifdef _WIN32
         path = std::filesystem::path(std::getenv("USERPROFILE")) / "Videos";
-#elif __APPLE__
-        path = std::filesystem::path(std::getenv("HOME")) / "Videos";
-#elif __linux__
-        path = std::filesystem::path(std::getenv("XDG_VIDEOS_DIR"));
+#elif __APPLE__ || __linux__
+        if (std::getenv("XDG_VIDEOS_DIR"))
+            path = std::filesystem::path(std::getenv("XDG_VIDEOS_DIR"));
+        else
+            path = std::filesystem::path(std::getenv("HOME")) / "Videos";
 #endif
         break;
     default:
         std::cout << "No valid path selected, use desktop path as default" << std::endl;
+        break;
     }
 }
 /**

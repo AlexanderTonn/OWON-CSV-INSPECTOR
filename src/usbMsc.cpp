@@ -104,12 +104,15 @@ auto usbMSC::getVolumePath(std::array<char, size> aBuffer) -> void
         sVolumePath = aBuffer.substr(volPos - 1, 2) + "\\";
 
 #elif __linux__
-    std::size_t volPos = aBuffer.find(sOwonVolume);
+    // on Linux you have to use std::string instead of std::array
+    std::string sBuffer(aBuffer.data(), aBuffer.size());
+
+    std::size_t volPos = sBuffer.find(sOwonVolume);
     if (volPos != std::string::npos)
     {
-        std::size_t startPos = aBuffer.rfind('\n', volPos) + 1;
-        std::size_t endPos = aBuffer.find(' ', startPos);
-        sVolumePath = aBuffer.substr(startPos, endPos - startPos);
+        std::size_t startPos = sBuffer.rfind('\n', volPos) + 1;
+        std::size_t endPos = sBuffer.find(' ', startPos);
+        sVolumePath = sBuffer.substr(startPos, endPos - startPos);
     }
 #elif __APPLE__
     sVolumePath = "/Volumes/" + std::string(sOwonVolume);
