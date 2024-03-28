@@ -15,6 +15,22 @@
 
 class WindowClass
 {
+    // Member initialization list
+public:
+    WindowClass() : sCursorUnit(labels.cbUnitY[0]),
+                    labels(),
+                    _usbHID(),
+                    _usbMSC(),
+                    _csvHandler(),
+                    _fileCSV() {}
+
+private:
+    std::string sCursorUnit;
+    csvHandler _csvHandler;
+    usbHID _usbHID;
+
+    // Window settings
+
 private:
     constexpr static auto window_flags = ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDecoration |
                                          ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_NoMove |
@@ -39,7 +55,7 @@ private:
         V
     };
     voltUnit voltUnitId = voltUnit::mV;
-    std::string_view sCursorUnit; // Used for the cursor data
+
     struct labels
     {
         std::string_view dialogNames[1] = {"Filebrowser"}; // Label for the file dialog
@@ -68,11 +84,10 @@ private:
                                       "Time interval"};
         std::string_view description[2] = {"The OWON Volume was found, do you want to copy files?", "CSV File options"};
         std::string_view footer[2] = {"No file found", "Current file: "};
-    };
-    labels labels;
+    } labels;
 
-    csvHandler _csvHandler;
-    usbHID _usbHID;
+
+
 
 
     // All about file and demo function
@@ -116,7 +131,7 @@ private:
     std::array<funcTrigger, 1> _trig; // increase the Array size if you need more triggers
     usbMSC _usbMSC;
     auto trigMscDetection() -> void;
-    bool xFindOwonVolumeActive; // if true, the program will search for the owon volume
+    bool xFindOwonVolumeActive = false;  // if true, the program will search for the owon volume
 
     // Footer
 private:

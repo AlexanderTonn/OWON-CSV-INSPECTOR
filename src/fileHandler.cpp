@@ -137,10 +137,15 @@ auto fileHandler::initFilePath(standardPath option) -> void
         path = std::filesystem::path(std::getenv("USERPROFILE")) / "Desktop";
 
 #elif __APPLE__ || __linux__
+        // check if XDG_DESKTOP_DIR is set
         if (std::getenv("XDG_DESKTOP_DIR"))
             path = std::filesystem::path(std::getenv("XDG_DESKTOP_DIR"));
+        // if XDG_DESKTOP_DIR is not set ...
+        else if(std::getenv("HOME/Desktop"))
+            path = std::filesystem::path(std::getenv("HOME/Desktop"));
+        // if HOME/Desktop is not set ...
         else
-            path = std::filesystem::path(std::getenv("HOME")) / "Desktop";
+            path = std::filesystem::path(std::getenv("HOME"));
 #endif
 
         break;
@@ -152,8 +157,10 @@ auto fileHandler::initFilePath(standardPath option) -> void
         ptr_xdgPath = std::getenv("XDG_DOCUMENTS_DIR");
         if (ptr_xdgPath)
             path = std::filesystem::path(std::getenv("XDG_DOCUMENTS_DIR"));
-        else
+        else if (std::getenv("HOME/Documents"))
             path = std::filesystem::path(std::getenv("HOME")) / "Documents";
+        else
+            path = std::filesystem::path(std::getenv("HOME"));
 #endif
         break;
 
@@ -163,8 +170,10 @@ auto fileHandler::initFilePath(standardPath option) -> void
 #elif __APPLE__ || __linux__
         if (std::getenv("XDG_DOWNLOAD_DIR"))
             path = std::filesystem::path(std::getenv("XDG_DOWNLOAD_DIR"));
+        else if(std::getenv("HOME/Downloads"))
+            path = std::filesystem::path(std::getenv("HOME/Downloads"));
         else
-            path = std::filesystem::path(std::getenv("HOME")) / "Downloads";
+            path = std::filesystem::path(std::getenv("HOME"));
 #endif
         break;
 
@@ -174,8 +183,10 @@ auto fileHandler::initFilePath(standardPath option) -> void
 #elif __APPLE__ || __linux__
         if (std::getenv("XDG_PICTURES_DIR"))
             path = std::filesystem::path(std::getenv("XDG_PICTURES_DIR"));
+        else if (std::getenv("HOME/Pictures"))
+            path = std::filesystem::path(std::getenv("HOME/Pictures"));
         else
-            path = std::filesystem::path(std::getenv("HOME")) / "Pictures";
+            path = std::filesystem::path(std::getenv("HOME"));
 #endif
         break;
     case standardPath::MUSIC:
@@ -184,8 +195,10 @@ auto fileHandler::initFilePath(standardPath option) -> void
 #elif __APPLE__ || __linux__
         if (std::getenv("XDG_MUSIC_DIR"))
             path = std::filesystem::path(std::getenv("XDG_MUSIC_DIR"));
+        else if (std::getenv("HOME/Music"))
+            path = std::filesystem::path(std::getenv("HOME/Music"));
         else
-            path = std::filesystem::path(std::getenv("HOME")) / "Music";
+            path = std::filesystem::path(std::getenv("HOME"));
 #endif
         break;
     case standardPath::VIDEOS:
@@ -194,8 +207,10 @@ auto fileHandler::initFilePath(standardPath option) -> void
 #elif __APPLE__ || __linux__
         if (std::getenv("XDG_VIDEOS_DIR"))
             path = std::filesystem::path(std::getenv("XDG_VIDEOS_DIR"));
+        else if(std::getenv("HOME/Videos"))
+            path = std::filesystem::path(std::getenv("HOME/Videos"));
         else
-            path = std::filesystem::path(std::getenv("HOME")) / "Videos";
+            path = std::filesystem::path(std::getenv("HOME"));
 #endif
         break;
     default:
