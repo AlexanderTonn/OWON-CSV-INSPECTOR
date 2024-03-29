@@ -1,31 +1,33 @@
-name: Ubuntu CI Test
+name: Ubuntu C++ CI
 
-on:
-  push:
-    branches: [ main, master, dev ]
-  pull_request:
-    branches: [ main, master, dev ]
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: install
-      run: |
-        sudo apt-get install gcovr lcov
-    - name: prepare
-      run: |
-        make prepare
-    - name: configure
-      run: |
-        cmake -H. -Bbuild -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DENABLE_COVERAGE=On
-    - name: building
-      run: |
-        cmake --build build --config Debug --target coverage -j4
-    - name: testing
-      run: |
-        cd build
-        cd tests
-        ./unit_tests
-        bash <(curl -s https://codecov.io/bash)
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Create Build Environment
+              run: cmake -E make_directory ${{github.workspace}}/ubuntuBuild
+
+            - name: Install vcpkg
+                run: |
+                    mkdir ${{github.workspace}}/external
+                    cd ${{github.workspace}}/external
+                    git clone https://github.com/Microsoft/vcpkg.git
+                    ./vcpkg/bootstrap-vcpkg.sh
+
+            - name: Configure CMake
+                shell: bash
+                run: cmake ${{github.workspace}} -B${{github.workspace}}/ubuntuBuild -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/external/vcpkg/scripts/buildsystems/vcpkg.cmake
+
+            - name: Build
+                shell: bash
+                run: cmake --build ${{github.workspace}}/ubuntuBuild
+
+            - name: Archive Build
+                uses: actions/upload-artifact@v2
+                with:
+                    name: ubuntuBuild-artifacts
+                    path: ${{github.workspace}}/ubuntuBuild/**
