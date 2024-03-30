@@ -75,6 +75,10 @@ add_executable(${PROJECT_NAME}
     src/usbMsc.cpp
     src/funcTrigger.hpp
     src/funcTrigger.cpp
+    src/guiStrings.hpp
+    src/guiStrings.cpp
+    src/dialogs.hpp
+    src/dialogs.cpp
 )
 
 add_compile_definitions(NOMINMAX)

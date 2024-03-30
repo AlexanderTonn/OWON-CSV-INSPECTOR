@@ -30,7 +30,7 @@ void WindowClass::Draw(std::string_view label)
 
     switch (pageId)
     {
-    case currentPage::MAIN:
+    case Dialogs::currentPage::MAIN:
         drawMenu();
         ImGui::SetCursorPos(ImVec2(0.0F, 18.0F));
 
@@ -42,26 +42,26 @@ void WindowClass::Draw(std::string_view label)
         drawFooter();
         break;
 
-    case currentPage::OPEN_CSV_FILE:
-        drawFilebrowser(_fileCSV.path,
-                        _fileCSV.sCurrentFile,
-                        _fileCSV.sNewFile,
-                        _fileCSV.xFileLoaded,
-                        _fileCSV,
-                        fileHandler::contentPathOption::WAVE_FILE);
+    case Dialogs::currentPage::OPEN_CSV_FILE:
+        pageId = _dialogs.drawFilebrowser(_fileCSV.path,
+                                          _fileCSV.sCurrentFile,
+                                          _fileCSV.sNewFile,
+                                          _fileCSV.xFileLoaded,
+                                          _fileCSV,
+                                          fileHandler::contentPathOption::WAVE_FILE);
         break;
 
-    case currentPage::CHOOSE_MSC_PATH:
-        drawFilebrowser(_fileMsc.path,
-                        _fileMsc.sCurrentFile,
-                        _fileMsc.sNewFile,
-                        _fileMsc.xFileLoaded,
-                        _fileMsc,
-                        fileHandler::contentPathOption::DIRECTORY);
+    case Dialogs::currentPage::CHOOSE_MSC_PATH:
+        pageId = _dialogs.drawFilebrowser(_fileMsc.path,
+                                          _fileMsc.sCurrentFile,
+                                          _fileMsc.sNewFile,
+                                          _fileMsc.xFileLoaded,
+                                          _fileMsc,
+                                          fileHandler::contentPathOption::DIRECTORY);
         break;
 
-    case currentPage::CHOICE_WINDOW:
-        choiceWindow(labels.dialogNames[1].data(), labels.description[0].data());
+    case Dialogs::currentPage::CHOICE_WINDOW:
+        _dialogs.choiceWindow(guiText::lbl.dialogNames.at(0).c_str(), guiText::lbl.fileBrowser.at(0).c_str());
         break;
 
     default:
@@ -105,8 +105,10 @@ auto WindowClass::drawPlot(voltUnit unit) -> void
 
     if (ImPlot::BeginPlot("###Plot", dynPlotSize, (ImPlotFlags_NoTitle | ImPlotFlags_Crosshairs)))
     {
-
-        ImPlot::SetupAxes(labels.plotX.data(), labels.plotY.data(), ImPlotAxisFlags_None, ImPlotAxisFlags_AutoFit);
+        ImPlot::SetupAxes(guiText::lbl.plot.at(1).c_str(),
+                          guiText::lbl.plot.at(0).c_str(),
+                          ImPlotAxisFlags_None,
+                          ImPlotAxisFlags_AutoFit);
         ImPlot::SetupAxisLimitsConstraints(ImAxis_X1, 0, numOfPoints);
 
         for (std::size_t i = 0; i < numOfPoints; ++i)
@@ -146,97 +148,44 @@ auto WindowClass::drawHeader() -> void
 {
     ImGui::Columns(9, "###mycolumns");
     ImGui::Separator();
-    ImGui::Text("%s", labels.header[0].data());
+    ImGui::Text("%s", guiText::lbl.header.at(0).c_str());
     ImGui::Text("%s", _csvHandler.extractHeaderData(_csvHandler.csvData, 0).c_str());
     ImGui::NextColumn();
 
-    ImGui::Text("%s", labels.header[1].data());
+    ImGui::Text("%s", guiText::lbl.header.at(1).c_str());
     ImGui::Text("%s", _csvHandler.extractHeaderData(_csvHandler.csvData, 6).c_str());
     ImGui::NextColumn();
 
-    ImGui::Text("%s", labels.header[2].data());
+    ImGui::Text("%s", guiText::lbl.header.at(2).c_str());
     ImGui::Text("%s", _csvHandler.extractHeaderData(_csvHandler.csvData, 3).c_str());
     ImGui::NextColumn();
 
-    ImGui::Text("%s", labels.header[3].data());
+    ImGui::Text("%s", guiText::lbl.header.at(3).c_str());
     ImGui::Text("%s", _csvHandler.extractHeaderData(_csvHandler.csvData, 4).c_str());
     ImGui::NextColumn();
 
-    ImGui::Text("%s", labels.header[4].data());
+    ImGui::Text("%s", guiText::lbl.header.at(4).c_str());
     ImGui::Text("%s", _csvHandler.extractHeaderData(_csvHandler.csvData, 5).c_str());
     ImGui::NextColumn();
 
-    ImGui::Text("%s", labels.header[5].data());
+    ImGui::Text("%s", guiText::lbl.header.at(5).c_str());
     ImGui::Text("%s", _csvHandler.extractHeaderData(_csvHandler.csvData, 1).c_str());
     ImGui::NextColumn();
 
-    ImGui::Text("%s", labels.header[6].data());
+    ImGui::Text("%s", guiText::lbl.header.at(6).c_str());
     ImGui::Text("%s", _csvHandler.extractHeaderData(_csvHandler.csvData, 2).c_str());
     ImGui::NextColumn();
 
-    ImGui::Text("%s", labels.header[7].data());
+    ImGui::Text("%s", guiText::lbl.header.at(7).c_str());
     ImGui::Text("%s", _csvHandler.extractHeaderData(_csvHandler.csvData, 7).c_str());
     ImGui::NextColumn();
 
-    ImGui::Text("%s", labels.header[8].data());
+    ImGui::Text("%s", guiText::lbl.header.at(8).c_str());
     ImGui::Text("%s", _csvHandler.extractHeaderData(_csvHandler.csvData, 8).c_str());
     ImGui::NextColumn();
     ImGui::Separator();
 
     ImGui::Columns(1);
-}
-/**
- * @brief draw the filebrowser
- *
- * @param fPath contains the complete path of selected item
- * @param sCurrent string path of the current file
- * @param sNew string path of the new file
- * @param xNotLoaded - true, if the file is not loaded
- * @note use the xNoatLoaded for proceeding the file once
- */
-auto WindowClass::drawFilebrowser(std::filesystem::path &fPath,
-                                  std::string &sCurrent,
-                                  std::string &sNew,
-                                  bool &xNotLoaded,
-                                  fileHandler &_fileHandler,
-                                  fileHandler::contentPathOption option) -> void
-{
-    ImGui::OpenPopup(labels.dialogNames[0].data());
-
-    if (ImGui::BeginPopupModal(labels.dialogNames[0].data(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-    {
-        static std::string sFileName;
-        // go back in file path
-        if (ImGui::Button(labels.buttons[5].data()))
-        {
-            // Check whether parent is available
-            if (fPath.has_parent_path() && fPath.parent_path() != fPath.root_path())
-                fPath = fPath.parent_path();
-        }
-        ImGui::Text("Current path: %s", fPath.string().c_str());
-        ImGui::Separator();
-
-        sNew = _fileHandler.getContentOfPath(fPath, option);
-
-        ImGui::Separator();
-        // OK Btn pressed
-        if (ImGui::Button(labels.buttons[6].data()))
-        {
-            sCurrent = sNew;
-            xNotLoaded = false; // Allow to load new file
-            pageId = currentPage::MAIN;
-            ImGui::CloseCurrentPopup();
-        }
-        ImGui::SameLine();
-
-        // Cancel Btn pressed
-        if (ImGui::Button(labels.buttons[7].data()))
-        {
-            pageId = currentPage::MAIN;
-            ImGui::CloseCurrentPopup();
-        }
-    }
-    ImGui::EndPopup();
 }
 
 /**
@@ -247,13 +196,14 @@ auto WindowClass::drawFilebrowser(std::filesystem::path &fPath,
 auto WindowClass::drawComboboxYUnit(voltUnit &unit) -> void
 {
 
-    static int item_current = 0;
-    if (ImGui::BeginCombo(labels.comboBoxes[0].data(), labels.cbUnitY[item_current].data()))
+    static size_t item_current = 0;
+    if (ImGui::BeginCombo(guiText::cb.names.at(0).c_str(), guiText::cb.unitY.at(item_current).c_str()))
     {
-        for (int n = 0; n < IM_ARRAYSIZE(labels.cbUnitY); n++)
+        size_t aSize = guiText::cb.unitY.size();
+        for (size_t n = 0; n < aSize; n++)
         {
             const bool is_selected = (item_current == n);
-            if (ImGui::Selectable(labels.cbUnitY[n].data(), is_selected))
+            if (ImGui::Selectable(guiText::cb.unitY.at(n).c_str(), is_selected))
             {
                 item_current = n;
                 unit = static_cast<voltUnit>(item_current);
@@ -262,7 +212,7 @@ auto WindowClass::drawComboboxYUnit(voltUnit &unit) -> void
             {
                 for (size_t i = 0; i < 4; i++)
                 {
-                    aPlottCursors[i] = 0.0f;
+                    aPlottCursors.at(i) = 0.0f;
                 }
                 ImGui::SetItemDefaultFocus();
             }
@@ -279,37 +229,39 @@ auto WindowClass::drawMenu() -> void
     if (ImGui::BeginMenuBar())
     {
         // "Menu"
-        if (ImGui::BeginMenu(labels.menu[0].data()))
+        if (ImGui::BeginMenu(guiText::lbl.menu.at(0).c_str()))
         {
-            ImGui::MenuItem(labels.description[1].data(), nullptr, false, false);
-            if (ImGui::MenuItem(labels.buttons[0].data()))
-                pageId = currentPage::OPEN_CSV_FILE;
-            ImGui::MenuItem(labels.checkBoxes[2].data(), nullptr, &xFindOwonVolumeActive);
+            //btn open file
+            ImGui::MenuItem(guiText::lbl.menu.at(4).c_str(), nullptr, nullptr, false);
+            if (ImGui::MenuItem(guiText::btn.menu.at(0).c_str()))
+                pageId = Dialogs::currentPage::OPEN_CSV_FILE;
+            ImGui::MenuItem(guiText::chkbx.names.at(2).c_str(), nullptr, &xFindOwonVolumeActive);
             ImGui::EndMenu();
         }
         // "View"
-        if (ImGui::BeginMenu(labels.menu[1].data()))
+        if (ImGui::BeginMenu(guiText::lbl.menu.at(1).c_str()))
         {
-            if (ImGui::MenuItem(labels.buttons[2].data(), nullptr, nullptr))
+            // Reset View
+            if (ImGui::MenuItem(guiText::btn.menu.at(2).c_str(), nullptr, nullptr, false))
                 xResetView = true;
             drawComboboxYUnit(voltUnitId);
 
             ImGui::EndMenu();
         }
-        // "Measure"
-        if (ImGui::BeginMenu(labels.menu[2].data()))
+        // "CSV"
+        if (ImGui::BeginMenu(guiText::lbl.menu.at(2).c_str()))
         {
-            if (ImGui::MenuItem(labels.buttons[1].data(), nullptr, nullptr))
+            if (ImGui::MenuItem(guiText::btn.menu.at(1).c_str(), nullptr, nullptr))
                 resetCursors();
-            ImGui::MenuItem(labels.checkBoxes[0].data(), nullptr, &xCursorY);
-            ImGui::MenuItem(labels.checkBoxes[1].data(), nullptr, &xCursorX);
+            ImGui::MenuItem(guiText::chkbx.names.at(0).c_str(), nullptr, &xCursorY);
+            ImGui::MenuItem(guiText::chkbx.names.at(1).c_str(), nullptr, &xCursorX);
 
             ImGui::EndMenu();
         }
         // "?" (Help) and other stuff
-        if (ImGui::BeginMenu(labels.menu[3].data()))
+        if (ImGui::BeginMenu(guiText::lbl.menu.at(3).c_str()))
         {
-            ImGui::MenuItem(labels.buttons[4].data(), nullptr, &xBugReportOpen);
+            ImGui::MenuItem(guiText::btn.menu.at(3).c_str(), nullptr, &xBugReportOpen);
             openBugReport();
             ImGui::EndMenu();
         }
@@ -368,7 +320,7 @@ auto WindowClass::drawCursorData() -> void
         ImGui::Text("Voltage: ");
         ImGui::TableNextColumn();
 
-        sCursorUnit = (voltUnitId == voltUnit::V) ? labels.cbUnitY[1] : labels.cbUnitY[0];
+        sCursorUnit = (voltUnitId == voltUnit::V) ? guiText::cb.unitY.at(1) : guiText::cb.unitY.at(0);
 
         ImGui::Text("A: %.2f %s", aPlottCursors[2], sCursorUnit.data());
         ImGui::TableNextColumn();
@@ -422,7 +374,6 @@ auto WindowClass::trigMscDetection() -> void
     if (_trig.at(0).fire(10'000))
         if (!_usbMSC.xVolumeFound && _usbMSC.findOwonVolume(xFindOwonVolumeActive))
             aFooterData.at(1) = "Owon Volume found. Want open? ";
-
 }
 /**
  * @brief Draw the footer data
@@ -432,7 +383,7 @@ auto WindowClass::drawFooter() -> void
 {
     aFooterData.at(0) = _fileCSV.sCurrentFile;
     if (aFooterData.at(0).empty())
-        aFooterData.at(0) = labels.footer[0].data();
+        aFooterData.at(0) = guiText::lbl.footer.at(0);
 
     ImGui::SetCursorPosY(footerStartPos());
 
@@ -440,15 +391,15 @@ auto WindowClass::drawFooter() -> void
     ImGui::TableNextRow();
     // COL 1
     ImGui::TableNextColumn();
-    ImGui::Text("%s %s", labels.footer[1].data(), aFooterData.at(0).c_str());
+    ImGui::Text("%s %s", guiText::lbl.footer.at(1).c_str(), aFooterData.at(0).c_str());
 
     // COL 2
     ImGui::TableNextColumn();
     ImGui::Text("%s", aFooterData.at(1).c_str());
-    // cheack each 10s if owon msc is connected
+
     ImGui::SameLine();
-    if (_usbMSC.xVolumeFound && ImGui::Button(labels.buttons[8].data()))
-        pageId = currentPage::CHOOSE_MSC_PATH;
+    if (_usbMSC.xVolumeFound && ImGui::Button(guiText::btn.footer.at(0).c_str()))
+        pageId = Dialogs::currentPage::CHOOSE_MSC_PATH;
 
 
     ImGui::EndTable();
@@ -477,43 +428,10 @@ auto WindowClass::handleFileData() -> void
     if (_fileCSV.check())
         _csvHandler.parseCSV(_fileCSV.sCurrentFile, _csvHandler.csvData);
 
-    if(_fileMsc.check())
-        if(_usbMSC.copy(_fileMsc.sCurrentFile))
+    if (_fileMsc.check())
+        if (_usbMSC.copy(_fileMsc.sCurrentFile))
         {
             aFooterData.at(1) = "Files copied to " + _fileMsc.sCurrentFile;
             _usbMSC.xVolumeFound = false;
         }
-
-
-}
-/**
- * @brief pening a dialog which allow to decide window
- *
- */
-auto WindowClass::choiceWindow(std::string_view sName, std::string_view sQuestion) -> bool
-{
-    auto xReturn = false;
-    ImGui::OpenPopup(sName.data());
-
-    if (ImGui::BeginPopupModal(sName.data(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-    {
-        ImGui::Text("%s", sQuestion.data());
-        ImGui::Spacing();
-
-        // OK Button
-        if (ImGui::Button(labels.buttons[6].data()))
-        {
-            ImGui::CloseCurrentPopup();
-            xReturn = true;
-        }
-        // Cancel Button
-        else if (ImGui::Button(labels.buttons[7].data()))
-        {
-            ImGui::CloseCurrentPopup();
-            xReturn = false;
-        }
-    }
-    ImGui::EndPopup();
-
-    return xReturn;
 }

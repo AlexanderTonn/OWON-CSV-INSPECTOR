@@ -5,6 +5,9 @@
 #include "funcTrigger.hpp"
 #include "usbHid.hpp"
 #include "usbMsc.hpp"
+#include "guiStrings.hpp"
+#include "dialogs.hpp"
+
 #include <array>
 #include <cstdint>
 #include <string_view>
@@ -17,8 +20,8 @@ class WindowClass
 {
     // Member initialization list
 public:
-    WindowClass() : sCursorUnit(labels.cbUnitY[0]),
-                    labels(),
+    WindowClass() : sCursorUnit(guiText::cb.unitY.at(0).c_str()),
+                    _dialogs(),
                     _usbHID(),
                     _usbMSC(),
                     _csvHandler(),
@@ -26,8 +29,12 @@ public:
 
 private:
     std::string sCursorUnit;
-    csvHandler _csvHandler;
+    Dialogs _dialogs;
     usbHID _usbHID;
+    usbMSC _usbMSC;
+    csvHandler _csvHandler;
+    fileHandler _fileMsc; // Instance for mass storage file handling
+    fileHandler _fileCSV; // Instance for CSV file handling
 
     // Window settings
 
@@ -39,15 +46,9 @@ private:
     constexpr static auto window_pos = ImVec2(0.0F, 0.0F);
 
     bool xFirstCycle = true; // Flag for the first cycle
+    Dialogs::currentPage pageId = Dialogs::currentPage::MAIN;
 
-    enum class currentPage
-    {
-        MAIN,
-        OPEN_CSV_FILE,
-        CHOOSE_MSC_PATH,
-        CHOICE_WINDOW
-    };
-    currentPage pageId = currentPage::MAIN;
+
 
     enum class voltUnit
     {
@@ -56,54 +57,9 @@ private:
     };
     voltUnit voltUnitId = voltUnit::mV;
 
-    struct labels
-    {
-        std::string_view dialogNames[1] = {"Filebrowser"}; // Label for the file dialog
-        std::string_view plotY = "Voltage";                // Label for the y-axis
-        std::string_view plotX = "Time";                   // Label for the x-axis
-        std::string_view menu[4] = {
-            "Options",
-            "View",
-            "CSV",
-            "?",
-        };
-        std::string_view buttons[9] =
-            {"Open file", "Reset Cursors", "Reset View", "Help", "Bug Report", " < ", " OK ", " Cancel ", " Yes "};
-        std::string_view comboBoxes[1] = {"Unit"};
-        std::string_view checkBoxes[3] = {"Add Cursors: Voltage", "Add Cursors: Time", "Search for OWON MSC"};
-        // Items for the y-axis unit
-        std::string_view cbUnitY[2] = {"mV", "V"};
-        std::string_view header[9] = {"Channel",
-                                      "Probe attenuation",
-                                      "Peak to Peak",
-                                      "Average",
-                                      "Vertical pos.",
-                                      "Frequency",
-                                      "Period",
-                                      "V per ADC Value",
-                                      "Time interval"};
-        std::string_view description[2] = {"The OWON Volume was found, do you want to copy files?", "CSV File options"};
-        std::string_view footer[2] = {"No file found", "Current file: "};
-    } labels;
-
-
-
-
-
     // All about file and demo function
 private:
-    fileHandler _fileCSV; // Instance for CSV file handling
-    auto drawFilebrowser(std::filesystem::path &fPath,
-                         std::string &sCurrent,
-                         std::string &sNew,
-                         bool &xNotLoaded ,
-                         fileHandler &_fileHandler,
-                         fileHandler::contentPathOption option) -> void;
-    auto choiceWindow(std::string_view sName, std::string_view sQuestion) -> bool;
     auto handleFileData() -> void;
-
-    fileHandler _fileMsc; // Instance for mass storage file handling
-
 
 private:
     auto drawPlot(voltUnit unit) -> void;
@@ -129,7 +85,7 @@ private:
     // Handling the OWON mass storage
 private:
     std::array<funcTrigger, 1> _trig; // increase the Array size if you need more triggers
-    usbMSC _usbMSC;
+
     auto trigMscDetection() -> void;
     bool xFindOwonVolumeActive = false;  // if true, the program will search for the owon volume
 
