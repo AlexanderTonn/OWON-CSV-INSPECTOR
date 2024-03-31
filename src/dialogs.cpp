@@ -7,6 +7,9 @@
  * @param sCurrent string path of the current file
  * @param sNew string path of the new file
  * @param xNotLoaded - true, if the file is not loaded
+ * @param _fileHandler instance of fileHandler
+ * @param option contentPathOption
+ * @param page reference to currentPage
  * @note use the xNoatLoaded for proceeding the file once
  */
 auto Dialogs::drawFilebrowser(std::filesystem::path &fPath,
@@ -14,11 +17,10 @@ auto Dialogs::drawFilebrowser(std::filesystem::path &fPath,
                                   std::string &sNew,
                                   bool &xNotLoaded,
                                   fileHandler &_fileHandler,
-                                  fileHandler::contentPathOption option) -> currentPage
+                                  fileHandler::contentPathOption option,
+                                  currentPage &page) -> void
 {
     ImGui::OpenPopup(guiText::lbl.dialogNames.at(0).c_str());
-
-    currentPage uiPageId ;
 
     if (ImGui::BeginPopupModal(guiText::lbl.dialogNames.at(0).c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
@@ -42,7 +44,7 @@ auto Dialogs::drawFilebrowser(std::filesystem::path &fPath,
         {
             sCurrent = sNew;
             xNotLoaded = false; // Allow to load new file
-            uiPageId = currentPage::MAIN;
+            page = currentPage::MAIN;
             ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
@@ -50,13 +52,11 @@ auto Dialogs::drawFilebrowser(std::filesystem::path &fPath,
         // Cancel Btn pressed
         if (ImGui::Button(guiText::btn.fileBrowser.at(2).c_str()))
         {
-            uiPageId = currentPage::MAIN;
+            page = currentPage::MAIN;
             ImGui::CloseCurrentPopup();
         }
     }
     ImGui::EndPopup();
-
-    return uiPageId;
 }
 
 /**

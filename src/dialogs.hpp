@@ -26,7 +26,8 @@ public:
                          std::string &sNew,
                          bool &xNotLoaded,
                          fileHandler &_fileHandler,
-                         fileHandler::contentPathOption option) -> currentPage;
+                         fileHandler::contentPathOption option,
+                         currentPage &page) -> void;
 
     auto choiceWindow(std::string sName, std::string sQuestion) -> bool;
 };

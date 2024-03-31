@@ -47,7 +47,7 @@ auto usbMSC::findOwonVolume(bool xActive) -> bool
         while (fgets(aBuffer.data(), aBuffer.size(), pipe.get()) != nullptr)
         {
             sParseResult += aBuffer.data();
-            std::cout << sParseResult << std::endl;
+            // std::cout << sParseResult << std::endl; // Show Volumes in Terminal
         }
 
 
@@ -118,6 +118,8 @@ auto usbMSC::getVolumePath(std::array<char, size> aBuffer) -> void
     sVolumePath = "/Volumes/" + std::string(sOwonVolume);
 #endif
 }
+
+
 /**
  * @brief Before start copy the files, create the subfolder for saving the files
  * @param sInputpath Inputpath is the target path passed by the user
@@ -175,8 +177,6 @@ auto usbMSC::getFiles(getFile type, uint8_t uiFileNo) -> bool
         return false;
     break;
     }
-    std::cout << "Image Path on Deive: " <<  sVolFilePath << std::endl;
-    std::cout << "TargetPath: " <<  sSaveDir << std::endl;
         // Move
         if (std::filesystem::exists(sVolFilePath) && std::filesystem::exists(sSavePath) )
         {

@@ -43,21 +43,23 @@ void WindowClass::Draw(std::string_view label)
         break;
 
     case Dialogs::currentPage::OPEN_CSV_FILE:
-        pageId = _dialogs.drawFilebrowser(_fileCSV.path,
-                                          _fileCSV.sCurrentFile,
-                                          _fileCSV.sNewFile,
-                                          _fileCSV.xFileLoaded,
-                                          _fileCSV,
-                                          fileHandler::contentPathOption::WAVE_FILE);
+        _dialogs.drawFilebrowser(_fileCSV.path,
+                                 _fileCSV.sCurrentFile,
+                                 _fileCSV.sNewFile,
+                                 _fileCSV.xFileLoaded,
+                                 _fileCSV,
+                                 fileHandler::contentPathOption::WAVE_FILE,
+                                 pageId);
         break;
 
     case Dialogs::currentPage::CHOOSE_MSC_PATH:
-        pageId = _dialogs.drawFilebrowser(_fileMsc.path,
-                                          _fileMsc.sCurrentFile,
-                                          _fileMsc.sNewFile,
-                                          _fileMsc.xFileLoaded,
-                                          _fileMsc,
-                                          fileHandler::contentPathOption::DIRECTORY);
+        _dialogs.drawFilebrowser(_fileMsc.path,
+                                 _fileMsc.sCurrentFile,
+                                 _fileMsc.sNewFile,
+                                 _fileMsc.xFileLoaded,
+                                 _fileMsc,
+                                 fileHandler::contentPathOption::DIRECTORY,
+                                 pageId);
         break;
 
     case Dialogs::currentPage::CHOICE_WINDOW:
@@ -232,7 +234,6 @@ auto WindowClass::drawMenu() -> void
         if (ImGui::BeginMenu(guiText::lbl.menu.at(0).c_str()))
         {
             //btn open file
-            ImGui::MenuItem(guiText::lbl.menu.at(4).c_str(), nullptr, nullptr, false);
             if (ImGui::MenuItem(guiText::btn.menu.at(0).c_str()))
                 pageId = Dialogs::currentPage::OPEN_CSV_FILE;
             ImGui::MenuItem(guiText::chkbx.names.at(2).c_str(), nullptr, &xFindOwonVolumeActive);
@@ -242,7 +243,7 @@ auto WindowClass::drawMenu() -> void
         if (ImGui::BeginMenu(guiText::lbl.menu.at(1).c_str()))
         {
             // Reset View
-            if (ImGui::MenuItem(guiText::btn.menu.at(2).c_str(), nullptr, nullptr, false))
+            if (ImGui::MenuItem(guiText::btn.menu.at(2).c_str(), nullptr, false))
                 xResetView = true;
             drawComboboxYUnit(voltUnitId);
 

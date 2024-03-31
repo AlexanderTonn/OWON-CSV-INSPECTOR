@@ -4,49 +4,50 @@
 #include <array>
 #include <string>
 
+// namespace guiText
 namespace guiText
 {
 
 struct buttons
 {
-    std::array<std::string, 5> menu = {"Open file", "Reset Cursors", "Reset View","Bug Report"};
-    std::array<std::string, 3> fileBrowser = {"<", "OK", "Cancel"};
-    std::array<std::string, 2> choiceWindow = {"OK", "Cancel"};
-    std::array<std::string, 1> footer = {"Yes"};
-} btn;
+    std::array<std::string, 5> menu ;
+    std::array<std::string, 3> fileBrowser ;
+    std::array<std::string, 2> choiceWindow ;
+    std::array<std::string, 1> footer ;
+};
+
+extern buttons btn;
 
 struct labels
 {
-    std::array<std::string, 4> menu = {"Options", "View", "CSV", "?"};
-    std::array<std::string, 2> plot = {"Voltage", "Time"};
-    std::array<std::string, 1> dialogNames = {"Filebrowser"};
-    std::array<std::string, 1> fileBrowser = {"OWON Volume was found, do you want to copy files?"};
-    std::array<std::string, 9> header = {"Channel",
-                                      "Probe attenuation",
-                                      "Peak to Peak",
-                                      "Average",
-                                      "Vertical pos.",
-                                      "Frequency",
-                                      "Period",
-                                      "V per ADC Value",
-                                      "Time interval"};
-    std::array<std::string, 2> footer = {"No file found", "Current file: "};
-} lbl;
+    std::array<std::string, 4> menu ;
+    std::array<std::string, 2> plot ;
+    std::array<std::string, 1> dialogNames;
+    std::array<std::string, 1> fileBrowser ;
+    std::array<std::string, 9> header ;
+    std::array<std::string, 2> footer ;
+};
+
+extern labels lbl;
 
 
 
 struct comboBoxes
 {
-    std::array<std::string, 1> names = {"Unit"}; // names of comboboxes
-    std::array<std::string, 2> unitY = {"mV", "V"}; // entries for the y-axis unit combobox
-} cb;
+    std::array<std::string, 1> names ; // names of comboboxes
+    std::array<std::string, 2> unitY ; // entries for the y-axis unit combobox
+};
+
+extern comboBoxes cb;
 
 struct checkBoxes
 {
-    std::array<std::string, 3> names = {"Add Cursors: Voltage", "Add Cursors: Time", "Search for OWON MSC"};
-} chkbx;
+    std::array<std::string, 3> names ;
+} ;
 
-} // namespace guiText
+extern checkBoxes chkbx;
+
+}
 
 
 // TODO!: later handle here the internationalization in a separate class
