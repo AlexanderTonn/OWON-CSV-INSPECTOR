@@ -33,30 +33,44 @@ auto usbMSC::findOwonVolume(bool xActive) -> bool
 #ifdef _WIN32
                                                           "wmic logicaldisk get name",
 #elif __linux__
-                                                          "lsblk"
+                                                          "lsblk -o NAME,SIZE,FSTYPE,MOUNTPOINT",
 #elif __APPLE__
-                                                          "diskutil list"
+                                                          "diskutil list",
 #endif
-                                                          ,
                                                           "r"),
                                                       pclose);
 
-        if (!pipe)
-            throw std::runtime_error("popen() failed!");
+        // Throw exception if volume listing failed
+        try
+        {
+            !pipe;
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+            std::runtime_error("popen() failed!");
+        }
 
         while (fgets(aBuffer.data(), aBuffer.size(), pipe.get()) != nullptr)
         {
             sParseResult += aBuffer.data();
-            // std::cout << sParseResult << std::endl; // Show Volumes in Terminal
+            std::cout << sParseResult << std::endl; // Show Volumes in Terminal
         }
 
-
+        #ifdef _WIN32 | __APPLE__
         if (sParseResult.find(sOwonVolume) != std::string::npos)
         {
             getVolumePath(aBuffer);
             xVolumeFound = true;
             return true;
         }
+        #elif __linux__
+        if(isSize_and_FAT12(aBuffer))
+        {
+            xVolumeFound = true;
+            return true;
+        }
+        #endif
     }
     else
         return false;
@@ -185,5 +199,18 @@ auto usbMSC::getFiles(getFile type, uint8_t uiFileNo) -> bool
         }
         else
             return false;
+
+}
+
+/**
+ * @brief Check if the volume is FAT12 and the size is 7,8MB - 8,0MB
+ *
+ * @tparam size
+ * @param aBuffer
+ * @return true if the volume is FAT12 and the size is 7,8MB - 8,0MB
+ */
+template <std::size_t size>
+auto usbMSC::isSize_and_FAT12(std::array<char, size> aBuffer) -> bool
+{
 
 }

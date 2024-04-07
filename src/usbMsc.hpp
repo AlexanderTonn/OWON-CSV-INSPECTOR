@@ -38,6 +38,10 @@ private:
     auto getVolumePath(std::array<char, size> aBuffer) -> void;
     std::string sVolumePath;
 
+// On Linux check size and fstype
+private:
+    template <std::size_t size>
+    auto isSize_and_FAT12(std::array<char, size> aBuffer) -> bool;
 
 private:
     auto createSaveDir(std::string sInputPath) -> bool;
