@@ -115,16 +115,16 @@ auto WindowClass::drawPlot(voltUnit unit) -> void
 
         for (std::size_t i = 0; i < numOfPoints; ++i)
         {
-            PlotX[i] = i;
+            PlotX.at(i) = static_cast<double>(i);
 
             // Raw data comes in as mv
             switch (unit)
             {
             case voltUnit::mV:
-                PlotY[i] = _csvHandler.extractData(_csvHandler.csvData, i);
+                PlotY.at(i) = _csvHandler.extractData(_csvHandler.csvData, i);
                 break;
             case voltUnit::V:
-                PlotY[i] = _csvHandler.extractData(_csvHandler.csvData, i) * 0.001;
+                PlotY.at(i) = _csvHandler.extractData(_csvHandler.csvData, i) * 0.001;
                 break;
             default:
                 break;
@@ -371,10 +371,13 @@ auto WindowClass::openBugReport() -> void
  */
 auto WindowClass::trigMscDetection() -> void
 {
+    bool xDeviceFound = _usbMSC.findOwonVolume(xFindOwonVolumeActive);
     // owon msc was found
     if (_trig.at(0).fire(10'000))
-        if (!_usbMSC.xVolumeFound && _usbMSC.findOwonVolume(xFindOwonVolumeActive))
+        if (!_usbMSC.xVolumeFound && xDeviceFound)
             aFooterData.at(1) = "Owon Volume found. Want open? ";
+
+    std::cout << "Owon device found: " << xDeviceFound << std::endl;
 }
 /**
  * @brief Draw the footer data

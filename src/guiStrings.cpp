@@ -22,7 +22,7 @@ guiText::labels lbl = {{"Options", "View", "CSV", "?"},
                         "Period",
                         "V per ADC Value",
                         "Time interval"},
-                       {"No file found", "Current file: "}};
+                       {"No file", "Current file: "}};
 
 guiText::comboBoxes cb = {{"Unit"}, {"mV", "V"}};
 

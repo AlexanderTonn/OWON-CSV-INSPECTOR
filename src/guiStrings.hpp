@@ -4,7 +4,6 @@
 #include <array>
 #include <string>
 
-// namespace guiText
 namespace guiText
 {
 

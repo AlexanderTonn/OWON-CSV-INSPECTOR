@@ -19,6 +19,7 @@ if(APPLE)
     set(CMAKE_OSX_ARCHITECTURES "arm64" ) # for apple silicon
 elseif(WIN32 OR UNIX)
     set(CMAKE_OSX_ARCHITECTURES "x86_64" ) # for intel
+
 endif()
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/)
@@ -27,6 +28,7 @@ option(ENABLE_WARNINGS "Enable to add warnings to a target." ON)
 option(ENABLE_WARNINGS_AS_ERRORS "Enable to treat warnings as errors." OFF)
 option(ENABLE_CLANG_TIDY "Enable to add clang tidy." ON)
 option(ENABLE_CLANG_FORMAT "Enable to add clang-format." ON)
+option(ENABLE_CPPCHECK "Enable to add cppcheck." ON)
 
 include(Warnings)
 #  include(Tools) # needs clang tidy and clang format
@@ -60,6 +62,8 @@ find_package(OpenGL REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBUSB REQUIRED IMPORTED_TARGET libusb-1.0)
 
+message("LIBUSB_INCLUDE_DIRS: ${LIBUSB_INCLUDE_DIRS}")
+message("LIBUSB_LIBRARIES: ${LIBUSB_LIBRARIES}")
 
 add_executable(${PROJECT_NAME}
     src/main.cpp
@@ -88,13 +92,14 @@ target_set_warnings(TARGET ${PROJECT_NAME}
     AS_ERRORS ${ENABLE_WARNINGS_AS_ERRORS})
 # add_clang_tidy_msvc_to_target(${PROJECT_NAME})
 
+set(LIBUSB_LIBRARY_PATH ${CMAKE_SOURCE_DIR}/build/vcpkg_installed/x64-windows/lib/libusb-1.0.lib)
+
+# LINKING:
 target_include_directories(${PROJECT_NAME} PUBLIC src/)
-
-
 
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt-header-only)
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
 target_link_libraries(${PROJECT_NAME} PRIVATE imgui::imgui)
 target_link_libraries(${PROJECT_NAME} PRIVATE implot::implot)
-target_link_libraries(${PROJECT_NAME} PRIVATE PkgConfig::LIBUSB)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBUSB_LIBRARY_PATH})

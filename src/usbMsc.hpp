@@ -19,6 +19,7 @@
 #include <chrono>
 #include <sstream>
 #include <filesystem>
+#include <cstdio>
 
 class usbMSC
 {

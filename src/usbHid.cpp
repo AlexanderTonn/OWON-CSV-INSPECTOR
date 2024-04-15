@@ -35,14 +35,17 @@ auto usbHID::getDeviceList() -> int
     // get the device list
     deviceCount = libusb_get_device_list(context, &deviceList);
 
-    // device error
-    if (deviceCount < 0)
+    try
     {
-        std::cerr << "Error: " << libusb_error_name(static_cast<int>(deviceCount)) << std::endl;
-        return -1;
+        if (deviceCount <= 0)
+            std::cerr << "Error: " << libusb_error_name(static_cast<int>(deviceCount)) << std::endl;
     }
-    else
-        return static_cast<int>(deviceCount);
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+
+    return static_cast<int>(deviceCount);
 }
 
 auto usbHID::connectionOpen() -> bool
