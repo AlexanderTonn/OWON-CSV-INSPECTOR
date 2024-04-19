@@ -92,14 +92,20 @@ target_set_warnings(TARGET ${PROJECT_NAME}
     AS_ERRORS ${ENABLE_WARNINGS_AS_ERRORS})
 # add_clang_tidy_msvc_to_target(${PROJECT_NAME})
 
-set(LIBUSB_LIBRARY_PATH ${CMAKE_SOURCE_DIR}/build/vcpkg_installed/x64-windows/lib/libusb-1.0.lib)
 
-# LINKING:
 target_include_directories(${PROJECT_NAME} PUBLIC src/)
 
+##################
+# LINKING DEPENDENCIES:
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt-header-only)
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
 target_link_libraries(${PROJECT_NAME} PRIVATE imgui::imgui)
 target_link_libraries(${PROJECT_NAME} PRIVATE implot::implot)
-target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBUSB_LIBRARY_PATH})
+
+if(WIN32)
+    set(LIBUSB_LIBRARY_PATH ${CMAKE_SOURCE_DIR}/build/vcpkg_installed/x64-windows/lib/libusb-1.0.lib)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBUSB_LIBRARY_PATH})
+elseif(APPLE OR UNIX)
+    target_link_libraries(${PROJECT_NAME} PRIVATE PkgConfig::LIBUSB)
+endif()
