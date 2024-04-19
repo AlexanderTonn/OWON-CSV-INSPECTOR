@@ -32,7 +32,7 @@ auto usbMSC::findOwonVolume(bool xActive) -> bool
 
 
 #ifdef _WIN32
-        std::unique_ptr<FILE,decltype(&_pclose)>pipe(_popen("wmic logicaldisk get caption", "r"), _pclose);
+        std::unique_ptr<FILE,decltype(&_pclose)>pipe(_popen("wmic logicaldisk get volumeName", "r"), _pclose);
 #elif __linux__
         std::unique_ptr<FILE, decltype(&pclose)> pipe(popen("lsblk -o NAME,SIZE,FSTYPE,MOUNTPOINT", "r"), pclose);
 #elif __APPLE__

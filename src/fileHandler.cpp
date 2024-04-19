@@ -37,17 +37,22 @@ auto fileHandler::getContentOfPath(std::filesystem::path &fPath, contentPathOpti
         const auto isDir = entry.is_directory();
         auto entryName = entry.path().filename().string();
 
+
+        #ifdef _WIN32
+        sDirSeparator = "\\";
+        #endif
+
         if (isDir)
         {
-            entryName = entryName + "/";
+            entryName = entryName + sDirSeparator;
         }
 
         if (ImGui::Selectable(entryName.c_str(), isSelected))
         {
             if (isDir)
             {
+                //TODO!: _WIN32 is throwing here an enhandled expection (std::filesystem::filesystem_error) at memory location ...
                 fPath /= entry.path().filename();
-                std::cout << fPath << std::endl;
             }
             selectedPath = entry.path();
         }
@@ -80,7 +85,7 @@ auto fileHandler::getContentOfPath(std::filesystem::path &fPath, contentPathOpti
             {
                 ImGui::Text("This is a directory");
 
-                return selectedPath.string() + '/';
+                return selectedPath.string() + sDirSeparator;
             }
             else
                 ImGui::Text("This is not a direktory");

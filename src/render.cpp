@@ -371,13 +371,11 @@ auto WindowClass::openBugReport() -> void
  */
 auto WindowClass::trigMscDetection() -> void
 {
-    bool xDeviceFound = _usbMSC.findOwonVolume(xFindOwonVolumeActive);
     // owon msc was found
-    if (_trig.at(0).fire(10'000))
-        if (!_usbMSC.xVolumeFound && xDeviceFound)
-            aFooterData.at(1) = "Owon Volume found. Want open? ";
-
-    std::cout << "Owon device found: " << xDeviceFound << std::endl;
+    if (_trig.at(0).fire(1'000))
+        _usbMSC.findOwonVolume(xFindOwonVolumeActive);
+        if (_usbMSC.xVolumeFound)
+            aFooterData.at(1) = guiText::lbl.fileBrowser.at(0);
 }
 /**
  * @brief Draw the footer data

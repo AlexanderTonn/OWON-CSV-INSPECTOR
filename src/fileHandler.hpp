@@ -6,7 +6,7 @@
 #include <imgui.h>
 #include <imgui_stdlib.h>
 #include <iostream>
-
+#include <string>
 
 class fileHandler
 {
@@ -16,6 +16,7 @@ public:
 
     std::string sCurrentFile = ""; // Current filename
     std::string sNewFile = ""; // New filename, which was selected by file dialog
+    std::string sDirSeparator = "/"; // Directory separator, defined for Unix systems
     bool xFileLoaded = false; // Flag to check if the CSV file was loaded
 
     auto checkFileString(std::string sFileName) -> bool; // Check if the file exists

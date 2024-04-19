@@ -22,7 +22,7 @@ struct labels
     std::array<std::string, 4> menu ;
     std::array<std::string, 2> plot ;
     std::array<std::string, 1> dialogNames;
-    std::array<std::string, 1> fileBrowser ;
+    std::array<std::string, 2> fileBrowser ;
     std::array<std::string, 9> header ;
     std::array<std::string, 2> footer ;
 };
