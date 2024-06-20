@@ -30,6 +30,7 @@ public:
                          currentPage &page) -> void;
 
     auto drawChoiceWindow(std::string stringName, std::string stringQuestion) -> bool;
+    auto drawMsDeviceSelector() -> void;
 };
 
 #endif // DIALOGS_HPP

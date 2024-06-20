@@ -19,6 +19,12 @@ void WindowClass::Draw(std::string_view label)
     // Backend stuff
     // ##########
 
+    if(firstCycle)
+    {
+        _guiTexts.init();
+        firstCycle = false;
+    }
+
     handleFileData();
 
     // ##########
@@ -63,7 +69,7 @@ void WindowClass::Draw(std::string_view label)
         break;
 
     case Dialogs::currentPage::CHOICE_WINDOW:
-        _dialogs.drawChoiceWindow(guiText::lbl.dialogNames.at(0).c_str(), guiText::lbl.fileBrowser.at(0).c_str());
+        _dialogs.drawChoiceWindow(_guiTexts.lbl.at(languageSelection).dialogNames.at(0).c_str(), _guiTexts.lbl.at(languageSelection).fileBrowser.at(0).c_str());
         break;
 
     default:
@@ -107,8 +113,8 @@ auto WindowClass::drawPlot(voltUnit unit) -> void
 
     if (ImPlot::BeginPlot("###Plot", dynPlotSize, (ImPlotFlags_NoTitle | ImPlotFlags_Crosshairs)))
     {
-        ImPlot::SetupAxes(guiText::lbl.plot.at(1).c_str(),
-                          guiText::lbl.plot.at(0).c_str(),
+        ImPlot::SetupAxes(_guiTexts.lbl.at(languageSelection).plot.at(1).c_str(),
+                          _guiTexts.lbl.at(languageSelection).plot.at(0).c_str(),
                           ImPlotAxisFlags_None,
                           ImPlotAxisFlags_AutoFit);
         ImPlot::SetupAxisLimitsConstraints(ImAxis_X1, 0, numOfPoints);
@@ -150,39 +156,39 @@ auto WindowClass::drawHeader() -> void
 {
     ImGui::Columns(9, "###mycolumns");
     ImGui::Separator();
-    ImGui::Text("%s", guiText::lbl.header.at(0).c_str());
+    ImGui::Text("%s", _guiTexts.lbl.at(languageSelection).header.at(0).c_str());
     ImGui::Text("%s", _csvHandler.extractHeaderData(_csvHandler.csvData, 0).c_str());
     ImGui::NextColumn();
 
-    ImGui::Text("%s", guiText::lbl.header.at(1).c_str());
+    ImGui::Text("%s", _guiTexts.lbl.at(languageSelection).header.at(1).c_str());
     ImGui::Text("%s", _csvHandler.extractHeaderData(_csvHandler.csvData, 6).c_str());
     ImGui::NextColumn();
 
-    ImGui::Text("%s", guiText::lbl.header.at(2).c_str());
+    ImGui::Text("%s", _guiTexts.lbl.at(languageSelection).header.at(2).c_str());
     ImGui::Text("%s", _csvHandler.extractHeaderData(_csvHandler.csvData, 3).c_str());
     ImGui::NextColumn();
 
-    ImGui::Text("%s", guiText::lbl.header.at(3).c_str());
+    ImGui::Text("%s", _guiTexts.lbl.at(languageSelection).header.at(3).c_str());
     ImGui::Text("%s", _csvHandler.extractHeaderData(_csvHandler.csvData, 4).c_str());
     ImGui::NextColumn();
 
-    ImGui::Text("%s", guiText::lbl.header.at(4).c_str());
+    ImGui::Text("%s", _guiTexts.lbl.at(languageSelection).header.at(4).c_str());
     ImGui::Text("%s", _csvHandler.extractHeaderData(_csvHandler.csvData, 5).c_str());
     ImGui::NextColumn();
 
-    ImGui::Text("%s", guiText::lbl.header.at(5).c_str());
+    ImGui::Text("%s", _guiTexts.lbl.at(languageSelection).header.at(5).c_str());
     ImGui::Text("%s", _csvHandler.extractHeaderData(_csvHandler.csvData, 1).c_str());
     ImGui::NextColumn();
 
-    ImGui::Text("%s", guiText::lbl.header.at(6).c_str());
+    ImGui::Text("%s", _guiTexts.lbl.at(languageSelection).header.at(6).c_str());
     ImGui::Text("%s", _csvHandler.extractHeaderData(_csvHandler.csvData, 2).c_str());
     ImGui::NextColumn();
 
-    ImGui::Text("%s", guiText::lbl.header.at(7).c_str());
+    ImGui::Text("%s", _guiTexts.lbl.at(languageSelection).header.at(7).c_str());
     ImGui::Text("%s", _csvHandler.extractHeaderData(_csvHandler.csvData, 7).c_str());
     ImGui::NextColumn();
 
-    ImGui::Text("%s", guiText::lbl.header.at(8).c_str());
+    ImGui::Text("%s", _guiTexts.lbl.at(languageSelection).header.at(8).c_str());
     ImGui::Text("%s", _csvHandler.extractHeaderData(_csvHandler.csvData, 8).c_str());
     ImGui::NextColumn();
     ImGui::Separator();
@@ -199,13 +205,13 @@ auto WindowClass::drawComboboxYUnit(voltUnit &unit) -> void
 {
 
     static size_t item_current = 0;
-    if (ImGui::BeginCombo(guiText::cb.names.at(0).c_str(), guiText::cb.unitY.at(item_current).c_str()))
+    if (ImGui::BeginCombo(_guiTexts.cb.at(languageSelection).names.at(0).c_str(), _guiTexts.cb.at(languageSelection).unitY.at(item_current).c_str()))
     {
-        size_t aSize = guiText::cb.unitY.size();
+        size_t aSize = _guiTexts.cb.at(languageSelection).unitY.size();
         for (size_t n = 0; n < aSize; n++)
         {
             const bool is_selected = (item_current == n);
-            if (ImGui::Selectable(guiText::cb.unitY.at(n).c_str(), is_selected))
+            if (ImGui::Selectable(_guiTexts.cb.at(languageSelection).unitY.at(n).c_str(), is_selected))
             {
                 item_current = n;
                 unit = static_cast<voltUnit>(item_current);
@@ -231,38 +237,38 @@ auto WindowClass::drawMenu() -> void
     if (ImGui::BeginMenuBar())
     {
         // "Menu"
-        if (ImGui::BeginMenu(guiText::lbl.menu.at(0).c_str()))
+        if (ImGui::BeginMenu(_guiTexts.lbl.at(languageSelection).menu.at(0).c_str()))
         {
             //btn open file
-            if (ImGui::MenuItem(guiText::btn.menu.at(0).c_str()))
+            if (ImGui::MenuItem(_guiTexts.btn.at(languageSelection).menu.at(0).c_str()))
                 pageId = Dialogs::currentPage::OPEN_CSV_FILE;
-            ImGui::MenuItem(guiText::chkbx.names.at(2).c_str(), nullptr, &findOwonVolumeActive);
+            ImGui::MenuItem(_guiTexts.chkbx.at(languageSelection).names.at(2).c_str(), nullptr, &findOwonVolumeActive);
             ImGui::EndMenu();
         }
         // "View"
-        if (ImGui::BeginMenu(guiText::lbl.menu.at(1).c_str()))
+        if (ImGui::BeginMenu(_guiTexts.lbl.at(languageSelection).menu.at(1).c_str()))
         {
             // Reset View
-            if (ImGui::MenuItem(guiText::btn.menu.at(2).c_str(), nullptr, false))
+            if (ImGui::MenuItem(_guiTexts.btn.at(languageSelection).menu.at(2).c_str(), nullptr, false))
                 resetView = true;
             drawComboboxYUnit(voltUnitId);
 
             ImGui::EndMenu();
         }
         // "CSV"
-        if (ImGui::BeginMenu(guiText::lbl.menu.at(2).c_str()))
+        if (ImGui::BeginMenu(_guiTexts.lbl.at(languageSelection).menu.at(2).c_str()))
         {
-            if (ImGui::MenuItem(guiText::btn.menu.at(1).c_str(), nullptr, nullptr))
+            if (ImGui::MenuItem(_guiTexts.btn.at(languageSelection).menu.at(1).c_str(), nullptr, nullptr))
                 resetCursors();
-            ImGui::MenuItem(guiText::chkbx.names.at(0).c_str(), nullptr, &cursorY);
-            ImGui::MenuItem(guiText::chkbx.names.at(1).c_str(), nullptr, &cursorX);
+            ImGui::MenuItem(_guiTexts.chkbx.at(languageSelection).names.at(0).c_str(), nullptr, &cursorY);
+            ImGui::MenuItem(_guiTexts.chkbx.at(languageSelection).names.at(1).c_str(), nullptr, &cursorX);
 
             ImGui::EndMenu();
         }
         // "?" (Help) and other stuff
-        if (ImGui::BeginMenu(guiText::lbl.menu.at(3).c_str()))
+        if (ImGui::BeginMenu(_guiTexts.lbl.at(languageSelection).menu.at(3).c_str()))
         {
-            ImGui::MenuItem(guiText::btn.menu.at(3).c_str(), nullptr, &bugReportOpen);
+            ImGui::MenuItem(_guiTexts.btn.at(languageSelection).menu.at(3).c_str(), nullptr, &bugReportOpen);
             openBugReport();
             ImGui::EndMenu();
         }
@@ -321,7 +327,7 @@ auto WindowClass::drawCursorData() -> void
         ImGui::Text("Voltage: ");
         ImGui::TableNextColumn();
 
-        stringCursorUnit = (voltUnitId == voltUnit::V) ? guiText::cb.unitY.at(1) : guiText::cb.unitY.at(0);
+        stringCursorUnit = (voltUnitId == voltUnit::V) ? _guiTexts.cb.at(languageSelection).unitY.at(1) : _guiTexts.cb.at(languageSelection).unitY.at(0);
 
         ImGui::Text("A: %.2f %s", arrayPlottCursors[2], stringCursorUnit.data());
         ImGui::TableNextColumn();
@@ -375,7 +381,7 @@ auto WindowClass::trigMscDetection() -> void
     if (_trig.at(0).fire(1'000))
         _usbMSC.findOwonVolume(findOwonVolumeActive);
         if (_usbMSC.volumeFound)
-            arrayFooterData.at(1) = guiText::lbl.fileBrowser.at(0);
+            arrayFooterData.at(1) = _guiTexts.lbl.at(languageSelection).fileBrowser.at(0);
 }
 /**
  * @brief Draw the footer data
@@ -385,7 +391,7 @@ auto WindowClass::drawFooter() -> void
 {
     arrayFooterData.at(0) = _fileCSV.stringCurrentFile;
     if (arrayFooterData.at(0).empty())
-        arrayFooterData.at(0) = guiText::lbl.footer.at(0);
+        arrayFooterData.at(0) = _guiTexts.lbl.at(languageSelection).footer.at(0);
 
     ImGui::SetCursorPosY(footerStartPos());
 
@@ -393,14 +399,14 @@ auto WindowClass::drawFooter() -> void
     ImGui::TableNextRow();
     // COL 1
     ImGui::TableNextColumn();
-    ImGui::Text("%s %s", guiText::lbl.footer.at(1).c_str(), arrayFooterData.at(0).c_str());
+    ImGui::Text("%s %s", _guiTexts.lbl.at(languageSelection).footer.at(1).c_str(), arrayFooterData.at(0).c_str());
 
     // COL 2
     ImGui::TableNextColumn();
     ImGui::Text("%s", arrayFooterData.at(1).c_str());
 
     ImGui::SameLine();
-    if (_usbMSC.volumeFound && ImGui::Button(guiText::btn.footer.at(0).c_str()))
+    if (_usbMSC.volumeFound && ImGui::Button(_guiTexts.btn.at(languageSelection).footer.at(0).c_str()))
         pageId = Dialogs::currentPage::CHOOSE_MSC_PATH;
 
 

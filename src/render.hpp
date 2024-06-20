@@ -20,7 +20,7 @@ class WindowClass
 {
     // Member initialization list
 public:
-    WindowClass() : stringCursorUnit(guiText::cb.unitY.at(0).c_str()),
+    WindowClass() : stringCursorUnit(_guiTexts.cb.at(languageSelection).unitY.at(0).c_str()),
                     _dialogs(),
                     _usbHID(),
                     _usbMSC(),

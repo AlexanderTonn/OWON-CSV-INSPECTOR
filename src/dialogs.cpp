@@ -20,12 +20,12 @@ auto Dialogs::drawFilebrowser(std::filesystem::path &path,
                                   fileHandler::contentPathOption option,
                                   currentPage &page) -> void
 {
-    ImGui::OpenPopup(guiText::lbl.dialogNames.at(0).c_str());
+    ImGui::OpenPopup(_guiTexts.lbl.at(languageSelection).dialogNames.at(0).c_str());
 
-    if (ImGui::BeginPopupModal(guiText::lbl.dialogNames.at(0).c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    if (ImGui::BeginPopupModal(_guiTexts.lbl.at(languageSelection).dialogNames.at(0).c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
         // go back in file path
-        if (ImGui::Button(guiText::btn.fileBrowser.at(0).c_str()))
+        if (ImGui::Button(_guiTexts.btn.at(languageSelection).fileBrowser.at(0).c_str()))
         {
             // Check whether parent is available
             if (path.has_parent_path() && path.parent_path() != path.root_path())
@@ -38,7 +38,7 @@ auto Dialogs::drawFilebrowser(std::filesystem::path &path,
 
         ImGui::Separator();
         // OK Btn pressed
-        if (ImGui::Button(guiText::btn.fileBrowser.at(1).c_str()))
+        if (ImGui::Button(_guiTexts.btn.at(languageSelection).fileBrowser.at(1).c_str()))
         {
             stringCurrent = stringNew;
             notLoaded = false; // Allow to load new file
@@ -48,7 +48,7 @@ auto Dialogs::drawFilebrowser(std::filesystem::path &path,
         ImGui::SameLine();
 
         // Cancel Btn pressed
-        if (ImGui::Button(guiText::btn.fileBrowser.at(2).c_str()))
+        if (ImGui::Button(_guiTexts.btn.at(languageSelection).fileBrowser.at(2).c_str()))
         {
             page = currentPage::MAIN;
             ImGui::CloseCurrentPopup();
@@ -72,13 +72,13 @@ auto Dialogs::drawChoiceWindow(std::string stringName, std::string stringQuestio
         ImGui::Spacing();
 
         // OK Button
-        if (ImGui::Button(guiText::btn.choiceWindow.at(0).c_str()))
+        if (ImGui::Button(_guiTexts.btn.at(languageSelection).choiceWindow.at(0).c_str()))
         {
             ImGui::CloseCurrentPopup();
             ret = true;
         }
         // Cancel Button
-        else if (ImGui::Button(guiText::btn.choiceWindow.at(1).c_str()))
+        else if (ImGui::Button(_guiTexts.btn.at(languageSelection).choiceWindow.at(1).c_str()))
         {
             ImGui::CloseCurrentPopup();
             ret = false;
@@ -87,4 +87,15 @@ auto Dialogs::drawChoiceWindow(std::string stringName, std::string stringQuestio
     ImGui::EndPopup();
 
     return ret;
+}
+
+/**
+ * @brief draw the mass storage device selector
+ * All available mass storage devices are listed here
+ * if the selected device contiains WAVE.CSV file, it can be loaded
+ * for preventing that a big drive will be checked, the maximum size is limited to 10MB
+ */
+auto Dialogs::drawMsDeviceSelector() -> void
+{
+
 }
