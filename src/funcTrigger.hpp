@@ -21,12 +21,12 @@
 class funcTrigger
 {
 public:
-    auto fire(uint32_t uiTriggerTime) -> bool;
+    auto fire(uint32_t triggerTime) -> bool;
 
 private:
-    std::chrono::time_point<std::chrono::high_resolution_clock> tStart;
+    std::chrono::time_point<std::chrono::high_resolution_clock> timeStart;
     auto getTimeSinceStart() -> int64_t;
-    int64_t uiOldTime = 0; // Save the olt time for cyclic triggering
+    int64_t oldTime = 0; // Save the olt time for cyclic triggering
 
 };
 

@@ -2,14 +2,14 @@
 /**
  * @brief Fire time dependent events by passing the time in milliseconds and use the return value to trigger the event
  *
- * @param uiTriggerTime target time in milliseconds
+ * @param triggerTime target time in milliseconds
  * @return
  */
-auto funcTrigger::fire(uint32_t uiTriggerTime) -> bool
+auto funcTrigger::fire(uint32_t triggerTime) -> bool
 {
-    if(getTimeSinceStart() - uiOldTime >= uiTriggerTime)
+    if(getTimeSinceStart() - oldTime >= triggerTime)
     {
-        uiOldTime = getTimeSinceStart();
+        oldTime = getTimeSinceStart();
         return true;
     }
     else
@@ -22,5 +22,5 @@ auto funcTrigger::fire(uint32_t uiTriggerTime) -> bool
  */
 auto funcTrigger::getTimeSinceStart() -> int64_t
 {
-    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - tStart).count();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - timeStart).count();
 }

@@ -25,7 +25,7 @@ public:
         };
     csvDataStruct csvData[DATA_ROWS];
 
-    auto parseCSV(std::string sFilename, csvDataStruct *csvData) -> void;
+    auto parseCSV(std::string stringFilename, csvDataStruct *csvData) -> void;
     auto extractData(csvDataStruct *csvData, const double lineNo) -> double;
     auto extractHeaderData(csvDataStruct *csvData, const double lineNo) -> std::string;
     auto debugPrint(std::vector<std::vector<std::string>> vector) -> void;

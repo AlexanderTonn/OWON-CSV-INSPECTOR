@@ -6,10 +6,10 @@
  * @return true
  * @return false
  */
-auto fileHandler::checkFileString(std::string sFileName) -> bool
+auto fileHandler::checkFileString(std::string stringFileName) -> bool
 {
-    std::cout << sFileName << std::endl;
-    if (std::filesystem::exists(sFileName))
+    std::cout << stringFileName << std::endl;
+    if (std::filesystem::exists(stringFileName))
     {
         return true;
     }
@@ -23,14 +23,14 @@ auto fileHandler::checkFileString(std::string sFileName) -> bool
 /**
  * @brief Get the Content Of Path
  * List it as ImGui::Text
- * @param fPath
+ * @param path
  * @return std::string
  */
-auto fileHandler::getContentOfPath(std::filesystem::path &fPath, contentPathOption option) -> std::string
+auto fileHandler::getContentOfPath(std::filesystem::path &path, contentPathOption option) -> std::string
 {
     static std::filesystem::path selectedPath; // after selecting in next frame, this will be the selected path
 
-    for (const auto &entry : std::filesystem::directory_iterator(fPath))
+    for (const auto &entry : std::filesystem::directory_iterator(path))
     {
 
         const auto isSelected = entry.path() == selectedPath;
@@ -44,15 +44,14 @@ auto fileHandler::getContentOfPath(std::filesystem::path &fPath, contentPathOpti
 
         if (isDir)
         {
-            entryName = entryName + sDirSeparator;
+            entryName = entryName + stringDirSeparator;
         }
 
         if (ImGui::Selectable(entryName.c_str(), isSelected))
         {
             if (isDir)
             {
-                //TODO!: _WIN32 is throwing here an enhandled expection (std::filesystem::filesystem_error) at memory location ...
-                fPath /= entry.path().filename();
+                path /= entry.path().filename();
             }
             selectedPath = entry.path();
         }
@@ -85,7 +84,7 @@ auto fileHandler::getContentOfPath(std::filesystem::path &fPath, contentPathOpti
             {
                 ImGui::Text("This is a directory");
 
-                return selectedPath.string() + sDirSeparator;
+                return selectedPath.string() + stringDirSeparator;
             }
             else
                 ImGui::Text("This is not a direktory");
@@ -231,9 +230,9 @@ auto fileHandler::initFilePath(standardPath option) -> void
  */
 auto fileHandler::check() -> bool
 {
-    if (!xFileLoaded && !sCurrentFile.empty())
+    if (!fileLoaded && !stringCurrentFile.empty())
     {
-        xFileLoaded = true;
+        fileLoaded = true;
         return true;
     }
     else

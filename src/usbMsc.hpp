@@ -25,41 +25,37 @@ class usbMSC
 {
 
 public:
-    auto findOwonVolume(bool xActive) -> bool;
-    auto copy(std::string sTargetSavePath) -> bool;
-    bool xVolumeFound = false; // if true, the owon volume is found
+    auto findOwonVolume(bool active) -> bool;
+    auto copy(std::string stringTargetSavePath) -> bool;
+    bool volumeFound = false; // if true, the owon volume is found
 
 private:
-    constexpr static std::string_view sOwonVolume = "NO NAME";
-    constexpr static std::string_view sSaveDir = "massStorageData";
+    constexpr static std::string_view stringOwonVolume = "NO NAME";
+    constexpr static std::string_view stringSaveDir = "massStorageData";
 
     // create volume path
 private:
     template <std::size_t size>
-    auto getVolumePath(std::array<char, size> aBuffer) -> void;
-    std::string sVolumePath;
+    auto getVolumePath(std::array<char, size> arrayBuffer) -> void;
+    std::string stringVolumePath;
 
-// On Linux check size and fstype
-private:
-    template <std::size_t size>
-    auto isSize_and_FAT12(std::array<char, size> aBuffer) -> bool;
 
 private:
-    auto createSaveDir(std::string sInputPath) -> bool;
+    auto createSaveDir(std::string stringInputPath) -> bool;
     enum class getFile
     {
         BMP,
         CSV,
         MOVE
     };
-    auto getFiles(getFile type, uint8_t uiFileNo) -> bool;
+    auto getFiles(getFile type, uint8_t fileNo) -> bool;
     constexpr static uint8_t MAX_FILE_COUNT = 4;
 
 // Create subfolder for saving the files
 private:
-    std::string sCurrentDate;
-    std::string sSavePath;
-    auto setSavePath(std::string sInputpath) -> bool;
+    std::string stringCurrentDate;
+    std::string stringSavePath;
+    auto setSavePath(std::string stringInputpath) -> bool;
     auto getDate() -> std::string;
 
 };

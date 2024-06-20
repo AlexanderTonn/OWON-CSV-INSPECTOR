@@ -12,10 +12,10 @@
  * @param page reference to currentPage
  * @note use the xNoatLoaded for proceeding the file once
  */
-auto Dialogs::drawFilebrowser(std::filesystem::path &fPath,
-                                  std::string &sCurrent,
-                                  std::string &sNew,
-                                  bool &xNotLoaded,
+auto Dialogs::drawFilebrowser(std::filesystem::path &path,
+                                  std::string &stringCurrent,
+                                  std::string &stringNew,
+                                  bool &notLoaded,
                                   fileHandler &_fileHandler,
                                   fileHandler::contentPathOption option,
                                   currentPage &page) -> void
@@ -24,26 +24,24 @@ auto Dialogs::drawFilebrowser(std::filesystem::path &fPath,
 
     if (ImGui::BeginPopupModal(guiText::lbl.dialogNames.at(0).c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-
-        static std::string sFileName;
         // go back in file path
         if (ImGui::Button(guiText::btn.fileBrowser.at(0).c_str()))
         {
             // Check whether parent is available
-            if (fPath.has_parent_path() && fPath.parent_path() != fPath.root_path())
-                fPath = fPath.parent_path();
+            if (path.has_parent_path() && path.parent_path() != path.root_path())
+                path = path.parent_path();
         }
-        ImGui::Text("Current path: %s", fPath.string().c_str());
+        ImGui::Text("Current path: %s", path.string().c_str());
         ImGui::Separator();
 
-        sNew = _fileHandler.getContentOfPath(fPath, option);
+        stringNew = _fileHandler.getContentOfPath(path, option);
 
         ImGui::Separator();
         // OK Btn pressed
         if (ImGui::Button(guiText::btn.fileBrowser.at(1).c_str()))
         {
-            sCurrent = sNew;
-            xNotLoaded = false; // Allow to load new file
+            stringCurrent = stringNew;
+            notLoaded = false; // Allow to load new file
             page = currentPage::MAIN;
             ImGui::CloseCurrentPopup();
         }
@@ -63,30 +61,30 @@ auto Dialogs::drawFilebrowser(std::filesystem::path &fPath,
  * @brief pening a dialog which allow to decide window
  *
  */
-auto Dialogs::choiceWindow(std::string sName, std::string sQuestion) -> bool
+auto Dialogs::drawChoiceWindow(std::string stringName, std::string stringQuestion) -> bool
 {
-    auto xReturn = false;
-    ImGui::OpenPopup(sName.c_str());
+    auto ret = false;
+    ImGui::OpenPopup(stringName.c_str());
 
-    if (ImGui::BeginPopupModal(sName.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    if (ImGui::BeginPopupModal(stringName.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("%s", sQuestion.c_str());
+        ImGui::Text("%s", stringQuestion.c_str());
         ImGui::Spacing();
 
         // OK Button
         if (ImGui::Button(guiText::btn.choiceWindow.at(0).c_str()))
         {
             ImGui::CloseCurrentPopup();
-            xReturn = true;
+            ret = true;
         }
         // Cancel Button
         else if (ImGui::Button(guiText::btn.choiceWindow.at(1).c_str()))
         {
             ImGui::CloseCurrentPopup();
-            xReturn = false;
+            ret = false;
         }
     }
     ImGui::EndPopup();
 
-    return xReturn;
+    return ret;
 }

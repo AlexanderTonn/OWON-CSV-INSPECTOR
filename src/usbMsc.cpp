@@ -5,12 +5,12 @@
  *
  * @return true if the dir exists or was created, otherwise false
  */
-auto usbMSC::createSaveDir(std::string sInputPath) -> bool
+auto usbMSC::createSaveDir(std::string stringInputPath) -> bool
 {
-    if (std::filesystem::exists(sInputPath))
+    if (std::filesystem::exists(stringInputPath))
         return true;
     else
-        return std::filesystem::create_directory(sInputPath);
+        return std::filesystem::create_directory(stringInputPath);
 }
 
 /**
@@ -19,14 +19,14 @@ auto usbMSC::createSaveDir(std::string sInputPath) -> bool
  * @param xActive Activate the function
  * @return true if the volume was found
  */
-auto usbMSC::findOwonVolume(bool xActive) -> bool
+auto usbMSC::findOwonVolume(bool active) -> bool
 {
-    if (xActive && !xVolumeFound)
+    if (active && !volumeFound)
     {
         // Buffer for the command output
         // if buffer is too small the fget() have to be called multiple times
-        std::array<char, 2'048> aBuffer;
-        std::string sParseResult;
+        std::array<char, 2'048> arrayBuffer;
+        std::string stringParseResult;
 
         // Open and execute command in shell
 
@@ -50,17 +50,17 @@ auto usbMSC::findOwonVolume(bool xActive) -> bool
             std::cerr << e.what() << '\n';
         }
 
-        while (fgets(aBuffer.data(), aBuffer.size(), pipe.get()) != nullptr)
+        while (fgets(arrayBuffer.data(), arrayBuffer.size(), pipe.get()) != nullptr)
         {
-            sParseResult += aBuffer.data();
-            std::cout << sParseResult << std::endl; // Show Volumes in Terminal
+            stringParseResult += arrayBuffer.data();
+            std::cout << stringParseResult << std::endl; // Show Volumes in Terminal
         }
 
 #if defined(_WIN32) || defined(__APPLE__)
-        if (sParseResult.find(sOwonVolume) != std::string::npos)
+        if (stringParseResult.find(stringOwonVolume) != std::string::npos)
         {
-            getVolumePath(aBuffer);
-            xVolumeFound = true;
+            getVolumePath(arrayBuffer);
+            volumeFound = true;
             return true;
         }
         else
@@ -83,10 +83,10 @@ auto usbMSC::findOwonVolume(bool xActive) -> bool
  *
  * @return true if files are found
  */
-auto usbMSC::copy(std::string sTargetSavePath) -> bool
+auto usbMSC::copy(std::string stringTargetSavePath) -> bool
 {
     // Create subfolder for saving the files
-    if (xVolumeFound && setSavePath(sTargetSavePath))
+    if (volumeFound && setSavePath(stringTargetSavePath))
     {
         // move the files
         for (uint8_t i = 1; i <= MAX_FILE_COUNT; i++)
@@ -96,9 +96,9 @@ auto usbMSC::copy(std::string sTargetSavePath) -> bool
         }
 
         // unmount the volume
-        std::string sUnmountCmd = "diskutil unmount \"" + std::string(sOwonVolume) + "\"";
-        system(sUnmountCmd.c_str());
-        xVolumeFound = false;
+        std::string stringUnmountCmd = "diskutil unmount \"" + std::string(stringOwonVolume) + "\"";
+        system(stringUnmountCmd.c_str());
+        volumeFound = false;
         return true;
     }
     else
@@ -108,55 +108,55 @@ auto usbMSC::copy(std::string sTargetSavePath) -> bool
  * @brief
  *
  * @tparam size
- * @param aBuffer
+ * @param arrayBuffer
  */
 template <std::size_t size>
-auto usbMSC::getVolumePath(std::array<char, size> aBuffer) -> void
+auto usbMSC::getVolumePath(std::array<char, size> arrayBuffer) -> void
 {
 #ifdef _WIN32 | __linux__
-    std::string sBuffer(aBuffer.data(), aBuffer.size());
+    std::string stringBuffer(arrayBuffer.data(), arrayBuffer.size());
 #endif
 
 #ifdef _WIN32
-    std::size_t volPos = sBuffer.find(sOwonVolume);
+    std::size_t volPos = stringBuffer.find(sOwonVolume);
     if (volPos != std::string::npos)
-        sVolumePath = sBuffer.substr(volPos - 1, 2) + "\\";
+        stringVolumePath = stringBuffer.substr(volPos - 1, 2) + "\\";
 
 #elif __linux__
     // on Linux you have to use std::string instead of std::array
-    std::string sBuffer(aBuffer.data(), aBuffer.size());
+    std::string sBuffer(arrayBuffer.data(), arrayBuffer.size());
 
-    std::size_t volPos = sBuffer.find(sOwonVolume);
+    std::size_t volPos = stringBuffer.find(stringOwonVolume);
     if (volPos != std::string::npos)
     {
-        std::size_t startPos = sBuffer.rfind('\n', volPos) + 1;
-        std::size_t endPos = sBuffer.find(' ', startPos);
-        sVolumePath = sBuffer.substr(startPos, endPos - startPos);
+        std::size_t startPos = stringBuffer.rfind('\n', volPos) + 1;
+        std::size_t endPos = stringBuffer.find(' ', startPos);
+        stringVolumePath = stringBuffer.substr(startPos, endPos - startPos);
     }
 #elif __APPLE__
-    sVolumePath = "/Volumes/" + std::string(sOwonVolume);
+    stringVolumePath = "/Volumes/" + std::string(stringOwonVolume);
 #endif
 }
 
 
 /**
  * @brief Before start copy the files, create the subfolder for saving the files
- * @param sInputpath Inputpath is the target path passed by the user
+ * @param stringInputpath Inputpath is the target path passed by the user
  * @return true if the subfolder exists or was created
  */
-auto usbMSC::setSavePath(std::string sInputpath) -> bool
+auto usbMSC::setSavePath(std::string stringInputpath) -> bool
 {
-    sCurrentDate = getDate();
-    sSavePath = sInputpath + std::string(sSaveDir) + "/" + sCurrentDate + "/";
+    stringCurrentDate = getDate();
+    stringSavePath = stringInputpath + std::string(stringSaveDir) + "/" + stringCurrentDate + "/";
 
     //auto mainDirPresent = createSaveDir(sInputpath);
 
-    if (std::filesystem::exists(sSavePath))
+    if (std::filesystem::exists(stringSavePath))
         return true;
     else
     {
-        if (sCurrentDate != "")
-            return std::filesystem::create_directories(sSavePath);
+        if (stringCurrentDate != "")
+            return std::filesystem::create_directories(stringSavePath);
         else
             return false;
     }
@@ -179,41 +179,29 @@ auto usbMSC::getDate() -> std::string
  * @brief Move the files from volume to the save directory
  *
  * @param type enum class fileTypes
- * @param uiFileNo used for the file number
+ * @param fileNo used for the file number
  */
-auto usbMSC::getFiles(getFile type, uint8_t uiFileNo) -> bool
+auto usbMSC::getFiles(getFile type, uint8_t fileNo) -> bool
 {
-    std::string sVolFilePath; // Path on OWON Volume
+    std::string stringVolFilePath; // Path on OWON Volume
     switch (type)
     {
     case getFile::BMP:
-        sVolFilePath = sVolumePath + "/" + "IMAGE" + std::to_string(uiFileNo) + ".BMP";
+        stringVolFilePath = stringVolumePath + "/" + "IMAGE" + std::to_string(fileNo) + ".BMP";
         break;
     case getFile::CSV:
-        sVolFilePath = sVolumePath + "/" + "WAVE" + std::to_string(uiFileNo) + ".CSV";
+        stringVolFilePath = stringVolumePath + "/" + "WAVE" + std::to_string(fileNo) + ".CSV";
         break;
     default:
         return false;
         break;
     }
     // Move
-    if (std::filesystem::exists(sVolFilePath) && std::filesystem::exists(sSavePath))
+    if (std::filesystem::exists(stringVolFilePath) && std::filesystem::exists(stringSavePath))
     {
-        std::filesystem::copy(sVolFilePath, sSavePath, std::filesystem::copy_options::overwrite_existing);
+        std::filesystem::copy(stringVolFilePath, stringSavePath, std::filesystem::copy_options::overwrite_existing);
         return true;
     }
     else
         return false;
-}
-
-/**
- * @brief Check if the volume is FAT12 and the size is 7,8MB - 8,0MB
- *
- * @tparam size
- * @param aBuffer
- * @return true if the volume is FAT12 and the size is 7,8MB - 8,0MB
- */
-template <std::size_t size>
-auto usbMSC::isSize_and_FAT12(std::array<char, size> aBuffer) -> bool
-{
 }

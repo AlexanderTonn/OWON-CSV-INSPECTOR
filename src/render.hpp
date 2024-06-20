@@ -20,7 +20,7 @@ class WindowClass
 {
     // Member initialization list
 public:
-    WindowClass() : sCursorUnit(guiText::cb.unitY.at(0).c_str()),
+    WindowClass() : stringCursorUnit(guiText::cb.unitY.at(0).c_str()),
                     _dialogs(),
                     _usbHID(),
                     _usbMSC(),
@@ -28,7 +28,7 @@ public:
                     _fileCSV() {}
 
 private:
-    std::string sCursorUnit;
+    std::string stringCursorUnit;
     Dialogs _dialogs;
     usbHID _usbHID;
     usbMSC _usbMSC;
@@ -45,10 +45,8 @@ private:
     constexpr static auto window_size = ImVec2(1280.0F, 720.0F);
     constexpr static auto window_pos = ImVec2(0.0F, 0.0F);
 
-    bool xFirstCycle = true; // Flag for the first cycle
+    bool firstCycle = true; // Flag for the first cycle
     Dialogs::currentPage pageId = Dialogs::currentPage::MAIN;
-
-
 
     enum class voltUnit
     {
@@ -67,17 +65,17 @@ private:
 
     // Menubar
 private:
-    bool xResetView = false; // Reset the view of the plot
+    bool resetView = false; // Reset the view of the plot
     auto drawMenu() -> void;
     auto drawComboboxYUnit(voltUnit &unit) -> void;
     auto openBugReport() -> void;
-    bool xBugReportOpen = false;
+    bool bugReportOpen = false;
 
     // Handling Plot Cursors
 private:
-    bool xCursorY = false;                        // Cursor for the voltage
-    bool xCursorX = false;                        // Cursor for the time
-    std::array<double, 4> aPlottCursors = {0.0f}; // Array for the cursor positions
+    bool cursorY = false;                        // Cursor for the voltage
+    bool cursorX = false;                        // Cursor for the time
+    std::array<double, 4> arrayPlottCursors = {0.0f}; // Array for the cursor positions
     auto drawCursors() -> void;
     auto drawCursorData() -> void;
     auto resetCursors() -> void;
@@ -87,12 +85,12 @@ private:
     std::array<funcTrigger, 1> _trig; // increase the Array size if you need more triggers
 
     auto trigMscDetection() -> void;
-    bool xFindOwonVolumeActive = false;  // if true, the program will search for the owon volume
+    bool findOwonVolumeActive = false;  // if true, the program will search for the owon volume
 
     // Footer
 private:
-    std::array<std::string, 2> aFooterData;
-    uint8_t aFooterSize = 20;
+    std::array<std::string, 2> arrayFooterData;
+    uint8_t footerSize = 20;
     auto drawFooter() -> void;
     auto footerStartPos() -> float;
 

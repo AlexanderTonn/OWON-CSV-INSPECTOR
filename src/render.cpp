@@ -44,9 +44,9 @@ void WindowClass::Draw(std::string_view label)
 
     case Dialogs::currentPage::OPEN_CSV_FILE:
         _dialogs.drawFilebrowser(_fileCSV.path,
-                                 _fileCSV.sCurrentFile,
-                                 _fileCSV.sNewFile,
-                                 _fileCSV.xFileLoaded,
+                                 _fileCSV.stringCurrentFile,
+                                 _fileCSV.stringNewFile,
+                                 _fileCSV.fileLoaded,
                                  _fileCSV,
                                  fileHandler::contentPathOption::WAVE_FILE,
                                  pageId);
@@ -54,16 +54,16 @@ void WindowClass::Draw(std::string_view label)
 
     case Dialogs::currentPage::CHOOSE_MSC_PATH:
         _dialogs.drawFilebrowser(_fileMsc.path,
-                                 _fileMsc.sCurrentFile,
-                                 _fileMsc.sNewFile,
-                                 _fileMsc.xFileLoaded,
+                                 _fileMsc.stringCurrentFile,
+                                 _fileMsc.stringNewFile,
+                                 _fileMsc.fileLoaded,
                                  _fileMsc,
                                  fileHandler::contentPathOption::DIRECTORY,
                                  pageId);
         break;
 
     case Dialogs::currentPage::CHOICE_WINDOW:
-        _dialogs.choiceWindow(guiText::lbl.dialogNames.at(0).c_str(), guiText::lbl.fileBrowser.at(0).c_str());
+        _dialogs.drawChoiceWindow(guiText::lbl.dialogNames.at(0).c_str(), guiText::lbl.fileBrowser.at(0).c_str());
         break;
 
     default:
@@ -99,10 +99,10 @@ auto WindowClass::drawPlot(voltUnit unit) -> void
     dynPlotSize.y = footerStartPos() - ImGui::GetCursorPos().y;
     dynPlotSize.x = ImGui::GetWindowWidth() - ImGui::GetCursorPos().x;
 
-    if (xResetView)
+    if (resetView)
     {
         ImPlot::SetNextAxesToFit();
-        xResetView = false;
+        resetView = false;
     }
 
     if (ImPlot::BeginPlot("###Plot", dynPlotSize, (ImPlotFlags_NoTitle | ImPlotFlags_Crosshairs)))
@@ -214,7 +214,7 @@ auto WindowClass::drawComboboxYUnit(voltUnit &unit) -> void
             {
                 for (size_t i = 0; i < 4; i++)
                 {
-                    aPlottCursors.at(i) = 0.0f;
+                    arrayPlottCursors.at(i) = 0.0f;
                 }
                 ImGui::SetItemDefaultFocus();
             }
@@ -236,7 +236,7 @@ auto WindowClass::drawMenu() -> void
             //btn open file
             if (ImGui::MenuItem(guiText::btn.menu.at(0).c_str()))
                 pageId = Dialogs::currentPage::OPEN_CSV_FILE;
-            ImGui::MenuItem(guiText::chkbx.names.at(2).c_str(), nullptr, &xFindOwonVolumeActive);
+            ImGui::MenuItem(guiText::chkbx.names.at(2).c_str(), nullptr, &findOwonVolumeActive);
             ImGui::EndMenu();
         }
         // "View"
@@ -244,7 +244,7 @@ auto WindowClass::drawMenu() -> void
         {
             // Reset View
             if (ImGui::MenuItem(guiText::btn.menu.at(2).c_str(), nullptr, false))
-                xResetView = true;
+                resetView = true;
             drawComboboxYUnit(voltUnitId);
 
             ImGui::EndMenu();
@@ -254,15 +254,15 @@ auto WindowClass::drawMenu() -> void
         {
             if (ImGui::MenuItem(guiText::btn.menu.at(1).c_str(), nullptr, nullptr))
                 resetCursors();
-            ImGui::MenuItem(guiText::chkbx.names.at(0).c_str(), nullptr, &xCursorY);
-            ImGui::MenuItem(guiText::chkbx.names.at(1).c_str(), nullptr, &xCursorX);
+            ImGui::MenuItem(guiText::chkbx.names.at(0).c_str(), nullptr, &cursorY);
+            ImGui::MenuItem(guiText::chkbx.names.at(1).c_str(), nullptr, &cursorX);
 
             ImGui::EndMenu();
         }
         // "?" (Help) and other stuff
         if (ImGui::BeginMenu(guiText::lbl.menu.at(3).c_str()))
         {
-            ImGui::MenuItem(guiText::btn.menu.at(3).c_str(), nullptr, &xBugReportOpen);
+            ImGui::MenuItem(guiText::btn.menu.at(3).c_str(), nullptr, &bugReportOpen);
             openBugReport();
             ImGui::EndMenu();
         }
@@ -277,20 +277,20 @@ auto WindowClass::drawMenu() -> void
  */
 auto WindowClass::drawCursors() -> void
 {
-    if (xCursorX)
+    if (cursorX)
     {
-        ImPlot::DragLineX(0, &aPlottCursors[0], ImVec4(1, 1, 0, 1));
-        ImPlot::DragLineX(1, &aPlottCursors[1], ImVec4(1, 1, 0, 1));
+        ImPlot::DragLineX(0, &arrayPlottCursors[0], ImVec4(1, 1, 0, 1));
+        ImPlot::DragLineX(1, &arrayPlottCursors[1], ImVec4(1, 1, 0, 1));
 
-        ImPlot::PlotText("A", aPlottCursors[0], 0, ImVec2(10, 0));
-        ImPlot::PlotText("B", aPlottCursors[1], 0, ImVec2(10, 0));
+        ImPlot::PlotText("A", arrayPlottCursors[0], 0, ImVec2(10, 0));
+        ImPlot::PlotText("B", arrayPlottCursors[1], 0, ImVec2(10, 0));
     }
-    if (xCursorY)
+    if (cursorY)
     {
-        ImPlot::DragLineY(2, &aPlottCursors[2], ImVec4(1, 1, 0, 1));
-        ImPlot::DragLineY(3, &aPlottCursors[3], ImVec4(1, 1, 0, 1));
-        ImPlot::PlotText("A", 0, aPlottCursors[2], ImVec2(10, 10));
-        ImPlot::PlotText("B", 0, aPlottCursors[3], ImVec2(10, 10));
+        ImPlot::DragLineY(2, &arrayPlottCursors[2], ImVec4(1, 1, 0, 1));
+        ImPlot::DragLineY(3, &arrayPlottCursors[3], ImVec4(1, 1, 0, 1));
+        ImPlot::PlotText("A", 0, arrayPlottCursors[2], ImVec2(10, 10));
+        ImPlot::PlotText("B", 0, arrayPlottCursors[3], ImVec2(10, 10));
     }
 }
 /**
@@ -301,33 +301,33 @@ auto WindowClass::drawCursorData() -> void
 {
     constexpr static auto tableFlags = ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchSame;
 
-    if (xCursorX)
+    if (cursorX)
     {
         ImGui::BeginTable("###XCursor", 4, tableFlags);
         ImGui::TableNextColumn();
         ImGui::Text("Time: ");
         ImGui::TableNextColumn();
-        ImGui::Text("A: %.2f micro seconds", aPlottCursors[0]);
+        ImGui::Text("A: %.2f micro seconds", arrayPlottCursors[0]);
         ImGui::TableNextColumn();
-        ImGui::Text("B: %.2f micro seconds", aPlottCursors[1]);
+        ImGui::Text("B: %.2f micro seconds", arrayPlottCursors[1]);
         ImGui::TableNextColumn();
-        ImGui::Text("AB: %.2f micro seconds", aPlottCursors[1] - aPlottCursors[0]);
+        ImGui::Text("AB: %.2f micro seconds", arrayPlottCursors[1] - arrayPlottCursors[0]);
         ImGui::EndTable();
     }
-    if (xCursorY)
+    if (cursorY)
     {
         ImGui::BeginTable("###YCursor", 4, tableFlags);
         ImGui::TableNextColumn();
         ImGui::Text("Voltage: ");
         ImGui::TableNextColumn();
 
-        sCursorUnit = (voltUnitId == voltUnit::V) ? guiText::cb.unitY.at(1) : guiText::cb.unitY.at(0);
+        stringCursorUnit = (voltUnitId == voltUnit::V) ? guiText::cb.unitY.at(1) : guiText::cb.unitY.at(0);
 
-        ImGui::Text("A: %.2f %s", aPlottCursors[2], sCursorUnit.data());
+        ImGui::Text("A: %.2f %s", arrayPlottCursors[2], stringCursorUnit.data());
         ImGui::TableNextColumn();
-        ImGui::Text("B: %.2f %s", aPlottCursors[3], sCursorUnit.data());
+        ImGui::Text("B: %.2f %s", arrayPlottCursors[3], stringCursorUnit.data());
         ImGui::TableNextColumn();
-        ImGui::Text("AB: %.2f %s", aPlottCursors[3] - aPlottCursors[2], sCursorUnit.data());
+        ImGui::Text("AB: %.2f %s", arrayPlottCursors[3] - arrayPlottCursors[2], stringCursorUnit.data());
         ImGui::EndTable();
     }
 }
@@ -339,7 +339,7 @@ auto WindowClass::resetCursors() -> void
 {
     for (size_t i = 0; i < 4; i++)
     {
-        aPlottCursors[i] = 0.0f;
+        arrayPlottCursors[i] = 0.0f;
     }
 }
 /**
@@ -349,19 +349,19 @@ auto WindowClass::resetCursors() -> void
  */
 auto WindowClass::openBugReport() -> void
 {
-    if (xBugReportOpen)
+    if (bugReportOpen)
     {
-        xBugReportOpen = false;
-        static std::string_view sBugReportUrl = "https://github.com/AlexanderTonn/OWON-CSV-INSPECTOR/issues";
+        bugReportOpen = false;
+        static std::string_view stringBugReportUrl = "https://github.com/AlexanderTonn/OWON-CSV-INSPECTOR/issues";
 
 #ifdef _WIN32
         ShellExecute(NULL, "open ", sBugReportUrl.data(), NULL, NULL, SW_SHOWNORMAL);
 #elif __APPLE__
-        std::string sCmd = std::string("open ") + sBugReportUrl.data();
-        system(sCmd.c_str());
+        std::string stringCmd = std::string("open ") + stringBugReportUrl.data();
+        system(stringCmd.c_str());
 #elif __linux__
         std::string sCmd = std::string("xdg-open ") + sBugReportUrl.data();
-        system(sCmd.c_str());
+        system(stringCmd.c_str());
 #endif
     }
 }
@@ -373,9 +373,9 @@ auto WindowClass::trigMscDetection() -> void
 {
     // owon msc was found
     if (_trig.at(0).fire(1'000))
-        _usbMSC.findOwonVolume(xFindOwonVolumeActive);
-        if (_usbMSC.xVolumeFound)
-            aFooterData.at(1) = guiText::lbl.fileBrowser.at(0);
+        _usbMSC.findOwonVolume(findOwonVolumeActive);
+        if (_usbMSC.volumeFound)
+            arrayFooterData.at(1) = guiText::lbl.fileBrowser.at(0);
 }
 /**
  * @brief Draw the footer data
@@ -383,9 +383,9 @@ auto WindowClass::trigMscDetection() -> void
  */
 auto WindowClass::drawFooter() -> void
 {
-    aFooterData.at(0) = _fileCSV.sCurrentFile;
-    if (aFooterData.at(0).empty())
-        aFooterData.at(0) = guiText::lbl.footer.at(0);
+    arrayFooterData.at(0) = _fileCSV.stringCurrentFile;
+    if (arrayFooterData.at(0).empty())
+        arrayFooterData.at(0) = guiText::lbl.footer.at(0);
 
     ImGui::SetCursorPosY(footerStartPos());
 
@@ -393,14 +393,14 @@ auto WindowClass::drawFooter() -> void
     ImGui::TableNextRow();
     // COL 1
     ImGui::TableNextColumn();
-    ImGui::Text("%s %s", guiText::lbl.footer.at(1).c_str(), aFooterData.at(0).c_str());
+    ImGui::Text("%s %s", guiText::lbl.footer.at(1).c_str(), arrayFooterData.at(0).c_str());
 
     // COL 2
     ImGui::TableNextColumn();
-    ImGui::Text("%s", aFooterData.at(1).c_str());
+    ImGui::Text("%s", arrayFooterData.at(1).c_str());
 
     ImGui::SameLine();
-    if (_usbMSC.xVolumeFound && ImGui::Button(guiText::btn.footer.at(0).c_str()))
+    if (_usbMSC.volumeFound && ImGui::Button(guiText::btn.footer.at(0).c_str()))
         pageId = Dialogs::currentPage::CHOOSE_MSC_PATH;
 
 
@@ -413,27 +413,27 @@ auto WindowClass::drawFooter() -> void
  */
 auto WindowClass::footerStartPos() -> float
 {
-    return ImGui::GetWindowHeight() - aFooterSize;
+    return ImGui::GetWindowHeight() - footerSize;
 }
 
 auto WindowClass::handleFileData() -> void
 {
     // Get path of the desktop
-    if (xFirstCycle)
+    if (firstCycle)
     {
         _fileCSV.initFilePath(fileHandler::standardPath::DOCUMENTS);
         _fileMsc.initFilePath(fileHandler::standardPath::DOCUMENTS);
-        xFirstCycle = false;
+        firstCycle = false;
     }
 
     // Draw the plot, if file is present
     if (_fileCSV.check())
-        _csvHandler.parseCSV(_fileCSV.sCurrentFile, _csvHandler.csvData);
+        _csvHandler.parseCSV(_fileCSV.stringCurrentFile, _csvHandler.csvData);
 
     if (_fileMsc.check())
-        if (_usbMSC.copy(_fileMsc.sCurrentFile))
+        if (_usbMSC.copy(_fileMsc.stringCurrentFile))
         {
-            aFooterData.at(1) = "Files copied to " + _fileMsc.sCurrentFile;
-            _usbMSC.xVolumeFound = false;
+            arrayFooterData.at(1) = "Files copied to " + _fileMsc.stringCurrentFile;
+            _usbMSC.volumeFound = false;
         }
 }

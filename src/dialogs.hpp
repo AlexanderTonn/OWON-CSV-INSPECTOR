@@ -21,15 +21,15 @@ public:
         CHOICE_WINDOW
     };
 
-    auto drawFilebrowser(std::filesystem::path &fPath,
-                         std::string &sCurrent,
-                         std::string &sNew,
-                         bool &xNotLoaded,
+    auto drawFilebrowser(std::filesystem::path &path,
+                         std::string &stringCurrent,
+                         std::string &stringNew,
+                         bool &notLoaded,
                          fileHandler &_fileHandler,
                          fileHandler::contentPathOption option,
                          currentPage &page) -> void;
 
-    auto choiceWindow(std::string sName, std::string sQuestion) -> bool;
+    auto drawChoiceWindow(std::string stringName, std::string stringQuestion) -> bool;
 };
 
 #endif // DIALOGS_HPP

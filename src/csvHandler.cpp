@@ -19,9 +19,9 @@
  * @param sFilename
  * @param data
  */
-auto csvHandler::parseCSV(std::string sFilename, csvDataStruct *data) -> void
+auto csvHandler::parseCSV(std::string stringFilename, csvDataStruct *data) -> void
 {
-    std::ifstream file(sFilename);
+    std::ifstream file(stringFilename);
 
     if (!file.is_open())
     {
@@ -35,23 +35,23 @@ auto csvHandler::parseCSV(std::string sFilename, csvDataStruct *data) -> void
     {
 
         // Reading single line
-        std::stringstream sStream(line);
+        std::stringstream stringStream(line);
         std::string token;
         // Parse the first lines as std::string for header Data
         if(lineCount < 11)
         {
-            std::getline(sStream,token,',');
+            std::getline(stringStream,token,',');
             data[lineCount].headerName = (token);
-            std::getline(sStream,token,',');
+            std::getline(stringStream,token,',');
             data[lineCount].headerData = token;
             lineCount++;
         }else
         {
             // Parse the first column as float
-            std::getline(sStream,token,',');
+            std::getline(stringStream,token,',');
             data[lineCount].x = std::stod(token);
             // Parse the second column
-            std::getline(sStream,token,',');
+            std::getline(stringStream,token,',');
             std::string s = token;
             data[lineCount].y = std::stod(token);
             lineCount++;

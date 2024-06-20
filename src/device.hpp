@@ -26,7 +26,7 @@ public:
         HDS2102,
         HDS2202
     };
-    uint16_t uiMemoryDepth = 0; // contains the memory depth of the device (CH1 operation)
+    uint16_t memoryDepth = 0; // contains the memory depth of the device (CH1 operation)
 
 private:
     auto getMemoryDepth(deviceType device) -> uint16_t;
